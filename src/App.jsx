@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { MessageSquare, X, Plus, MapPin, Trash2, Info, Sparkles, FileText, Loader2 } from 'lucide-react';
+import { MessageSquare, X, Plus, MapPin, Trash2, Info, Sparkles, FileText, Loader2, Camera, Download, Filter } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import { initializeApp } from 'firebase/app';
 import {
   getAuth,
@@ -416,6 +417,9 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [pendingPinX, setPendingPinX] = useState(null);
+  const [dateFilter, setDateFilter] = useState('all'); // 'all', 'today', 'week', 'sprint'
+  const [isExporting, setIsExporting] = useState(false);
+  const chartRef = useRef(null);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -479,6 +483,61 @@ export default function App() {
     }
   };
 
+  // Filter pins by date range
+  const filterPinsByDate = (pins) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    return pins.filter(pin => {
+      if (!pin.createdAt) return true; // Show pins without date
+      const pinDate = new Date(pin.createdAt.seconds * 1000);
+
+      switch(dateFilter) {
+        case 'today':
+          return pinDate >= today;
+        case 'week':
+          const weekAgo = new Date(today);
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          return pinDate >= weekAgo;
+        case 'sprint':
+          // Assuming 2-week sprint
+          const sprintStart = new Date(today);
+          sprintStart.setDate(sprintStart.getDate() - 14);
+          return pinDate >= sprintStart;
+        default:
+          return true;
+      }
+    });
+  };
+
+  const filteredPins = useMemo(() => filterPinsByDate(pins), [pins, dateFilter]);
+
+  // Export screenshot
+  const handleExportScreenshot = async () => {
+    if (!chartRef.current) return;
+    setIsExporting(true);
+
+    try {
+      const canvas = await html2canvas(chartRef.current, {
+        backgroundColor: '#f1f5f9',
+        scale: 2,
+        logging: false,
+        useCORS: true
+      });
+
+      const link = document.createElement('a');
+      const timestamp = new Date().toISOString().split('T')[0];
+      link.download = `hill-chart-${timestamp}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('Error exporting screenshot:', error);
+      alert('Failed to export screenshot. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 font-sans p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-8">
@@ -496,36 +555,77 @@ export default function App() {
             <p className="text-slate-500 mt-1">Track progress from uncertainty to execution.</p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+             <button
+               onClick={handleExportScreenshot}
+               disabled={isExporting}
+               className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white text-sm font-bold rounded-full shadow-md hover:shadow-lg transition-all"
+             >
+               {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+               {isExporting ? 'Exporting...' : 'Export Screenshot'}
+             </button>
              <button
                onClick={() => setIsReportOpen(true)}
                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-full shadow-md hover:shadow-lg transition-all"
              >
                <Sparkles size={16} />
-               Generate Status Report
+               Generate Report
              </button>
           </div>
         </header>
 
-        <main className="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 md:p-10 overflow-visible">
-          <HillChart
-            pins={pins}
-            onAddPin={handleChartClick}
-            onDeletePin={handleDeletePin}
-          />
-        </main>
+        {/* Date Filter Buttons */}
+        <div className="flex flex-wrap items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <div className="flex items-center gap-2 text-slate-600 font-semibold">
+            <Filter size={18} />
+            <span className="text-sm">Filter by:</span>
+          </div>
+          <div className="flex gap-2">
+            {[
+              { value: 'all', label: 'All Time' },
+              { value: 'today', label: 'Today' },
+              { value: 'week', label: 'Last Week' },
+              { value: 'sprint', label: 'Current Sprint (2 weeks)' }
+            ].map(filter => (
+              <button
+                key={filter.value}
+                onClick={() => setDateFilter(filter.value)}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                  dateFilter === filter.value
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+          <div className="ml-auto text-sm text-slate-500">
+            Showing {filteredPins.length} of {pins.length} updates
+          </div>
+        </div>
 
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h2 className="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2">
-              <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
-              Uphill (Figuring it out)
-            </h2>
-            <div className="space-y-3">
-              {pins.filter(p => p.x < 50).length === 0 && (
+        {/* Chart Container with Ref for Screenshot */}
+        <div ref={chartRef}>
+          <main className="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 md:p-10 overflow-visible">
+            <HillChart
+              pins={filteredPins}
+              onAddPin={handleChartClick}
+              onDeletePin={handleDeletePin}
+            />
+          </main>
+
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h2 className="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2">
+                <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+                Uphill (Figuring it out)
+              </h2>
+              <div className="space-y-3">
+                {filteredPins.filter(p => p.x < 50).length === 0 && (
                 <div className="text-slate-400 italic text-sm bg-white p-4 rounded-xl border border-slate-200 border-dashed text-center">No updates in this phase</div>
               )}
-              {pins.filter(p => p.x < 50).map(pin => (
+              {filteredPins.filter(p => p.x < 50).map(pin => (
                 <div key={pin.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3 transition-hover hover:shadow-md relative group">
                   <div className="text-2xl bg-slate-50 p-2 rounded-lg">{pin.emoji}</div>
                   <div className="flex-1">
@@ -558,10 +658,10 @@ export default function App() {
               Downhill (Executing)
             </h2>
             <div className="space-y-3">
-              {pins.filter(p => p.x >= 50).length === 0 && (
+              {filteredPins.filter(p => p.x >= 50).length === 0 && (
                 <div className="text-slate-400 italic text-sm bg-white p-4 rounded-xl border border-slate-200 border-dashed text-center">No updates in this phase</div>
               )}
-              {pins.filter(p => p.x >= 50).map(pin => (
+              {filteredPins.filter(p => p.x >= 50).map(pin => (
                 <div key={pin.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3 transition-hover hover:shadow-md relative group">
                   <div className="text-2xl bg-slate-50 p-2 rounded-lg">{pin.emoji}</div>
                   <div className="flex-1">
@@ -587,7 +687,9 @@ export default function App() {
               ))}
             </div>
           </div>
-        </section>
+          </section>
+        </div>
+        {/* End of screenshot ref */}
 
       </div>
 
