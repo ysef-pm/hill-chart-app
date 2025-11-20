@@ -176,10 +176,16 @@ const HillChart = ({ pins, onAddPin, onDeletePin }) => {
               className={`w-4 h-4 rounded-full border-2 border-white shadow-md cursor-pointer transition-transform hover:scale-125 ${isUphill ? 'bg-amber-500' : 'bg-emerald-500'}`}
             ></div>
 
-            <div className="absolute bottom-6 opacity-0 scale-90 group-hover/pin:opacity-100 group-hover/pin:scale-100 transition-all duration-200 w-48 pointer-events-none z-30">
+            <div className="absolute bottom-6 opacity-0 scale-90 group-hover/pin:opacity-100 group-hover/pin:scale-100 transition-all duration-200 w-56 pointer-events-none z-30">
               <div className="bg-white rounded-lg shadow-xl p-3 border border-slate-100 text-center">
                 <div className="text-2xl mb-1">{pin.emoji}</div>
                 <p className="text-sm font-medium text-slate-700 leading-tight mb-1">{pin.text}</p>
+                {pin.name && <p className="text-xs font-semibold text-blue-600 mb-1">👤 {pin.name}</p>}
+                {pin.createdAt && (
+                  <p className="text-[10px] text-slate-400 mb-1">
+                    📅 {new Date(pin.createdAt.seconds * 1000).toLocaleDateString()} {new Date(pin.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                )}
                 <p className="text-[10px] text-slate-400">{isUphill ? '🧗 Uphill' : '⛷️ Downhill'}</p>
               </div>
               <div className="w-3 h-3 bg-white transform rotate-45 border-r border-b border-slate-100 absolute -bottom-1.5 left-1/2 -translate-x-1/2 shadow-sm"></div>
@@ -209,12 +215,14 @@ const HillChart = ({ pins, onAddPin, onDeletePin }) => {
 const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
   const [text, setText] = useState('');
   const [emoji, setEmoji] = useState('🤔');
+  const [name, setName] = useState('');
   const [isSuggesting, setIsSuggesting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setText('');
       setEmoji('🤔');
+      setName('');
     }
   }, [isOpen]);
 
@@ -253,6 +261,17 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
         </div>
 
         <div className="space-y-6">
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Your Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your name"
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-slate-700 placeholder-slate-400 text-sm"
+            />
+          </div>
+
           <div>
             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">How are you feeling?</label>
             <div className="flex flex-wrap gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
@@ -293,10 +312,11 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
 
           <button
             onClick={() => {
-              if (!text.trim()) return;
-              onSubmit({ text, emoji });
+              if (!text.trim() || !name.trim()) return;
+              onSubmit({ text, emoji, name });
             }}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-2"
+            disabled={!text.trim() || !name.trim()}
+            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-2"
           >
             <MapPin size={18} />
             Pin Update
@@ -429,7 +449,7 @@ export default function App() {
     setIsModalOpen(true);
   };
 
-  const handleSavePin = async ({ text, emoji }) => {
+  const handleSavePin = async ({ text, emoji, name }) => {
     if (!user) return;
 
     try {
@@ -437,6 +457,7 @@ export default function App() {
         x: pendingPinX,
         text,
         emoji,
+        name,
         uid: user.uid,
         createdAt: serverTimestamp()
       });
@@ -505,12 +526,27 @@ export default function App() {
                 <div className="text-slate-400 italic text-sm bg-white p-4 rounded-xl border border-slate-200 border-dashed text-center">No updates in this phase</div>
               )}
               {pins.filter(p => p.x < 50).map(pin => (
-                <div key={pin.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3 transition-hover hover:shadow-md">
+                <div key={pin.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3 transition-hover hover:shadow-md relative group">
                   <div className="text-2xl bg-slate-50 p-2 rounded-lg">{pin.emoji}</div>
-                  <div>
-                    <p className="text-slate-700 text-sm leading-relaxed">{pin.text}</p>
-                    <p className="text-xs text-slate-400 mt-1">Position: {Math.round(pin.x)}%</p>
+                  <div className="flex-1">
+                    <p className="text-slate-700 text-sm leading-relaxed mb-2">{pin.text}</p>
+                    {pin.name && (
+                      <p className="text-xs font-semibold text-blue-600 mb-1">👤 {pin.name}</p>
+                    )}
+                    <div className="flex items-center gap-3 text-xs text-slate-400">
+                      <span>Position: {Math.round(pin.x)}%</span>
+                      {pin.createdAt && (
+                        <span>📅 {new Date(pin.createdAt.seconds * 1000).toLocaleDateString()} {new Date(pin.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      )}
+                    </div>
                   </div>
+                  <button
+                    onClick={() => handleDeletePin(pin.id)}
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-red-100 hover:bg-red-200 p-1.5 rounded-full text-red-600 transition-all"
+                    title="Delete Update"
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </div>
               ))}
             </div>
@@ -526,12 +562,27 @@ export default function App() {
                 <div className="text-slate-400 italic text-sm bg-white p-4 rounded-xl border border-slate-200 border-dashed text-center">No updates in this phase</div>
               )}
               {pins.filter(p => p.x >= 50).map(pin => (
-                <div key={pin.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3 transition-hover hover:shadow-md">
+                <div key={pin.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3 transition-hover hover:shadow-md relative group">
                   <div className="text-2xl bg-slate-50 p-2 rounded-lg">{pin.emoji}</div>
-                  <div>
-                    <p className="text-slate-700 text-sm leading-relaxed">{pin.text}</p>
-                    <p className="text-xs text-slate-400 mt-1">Position: {Math.round(pin.x)}%</p>
+                  <div className="flex-1">
+                    <p className="text-slate-700 text-sm leading-relaxed mb-2">{pin.text}</p>
+                    {pin.name && (
+                      <p className="text-xs font-semibold text-blue-600 mb-1">👤 {pin.name}</p>
+                    )}
+                    <div className="flex items-center gap-3 text-xs text-slate-400">
+                      <span>Position: {Math.round(pin.x)}%</span>
+                      {pin.createdAt && (
+                        <span>📅 {new Date(pin.createdAt.seconds * 1000).toLocaleDateString()} {new Date(pin.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      )}
+                    </div>
                   </div>
+                  <button
+                    onClick={() => handleDeletePin(pin.id)}
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-red-100 hover:bg-red-200 p-1.5 rounded-full text-red-600 transition-all"
+                    title="Delete Update"
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </div>
               ))}
             </div>
