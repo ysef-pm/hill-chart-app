@@ -180,6 +180,11 @@ const HillChart = ({ pins, onAddPin, onDeletePin }) => {
             <div className="absolute bottom-6 opacity-0 scale-90 group-hover/pin:opacity-100 group-hover/pin:scale-100 transition-all duration-200 w-56 pointer-events-none z-30">
               <div className="bg-white rounded-lg shadow-xl p-3 border border-slate-100 text-center">
                 <div className="text-2xl mb-1">{pin.emoji}</div>
+                {pin.projectName && (
+                  <div className="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md mb-2 inline-block border border-indigo-100">
+                    {pin.projectName}
+                  </div>
+                )}
                 <p className="text-sm font-medium text-slate-700 leading-tight mb-1">{pin.text}</p>
                 {pin.name && <p className="text-xs font-semibold text-blue-600 mb-1">👤 {pin.name}</p>}
                 {pin.createdAt && (
@@ -217,6 +222,7 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
   const [text, setText] = useState('');
   const [emoji, setEmoji] = useState('🤔');
   const [name, setName] = useState('');
+  const [projectName, setProjectName] = useState('');
   const [isSuggesting, setIsSuggesting] = useState(false);
 
   useEffect(() => {
@@ -224,6 +230,7 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
       setText('');
       setEmoji('🤔');
       setName('');
+      setProjectName('');
     }
   }, [isOpen]);
 
@@ -262,6 +269,17 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
         </div>
 
         <div className="space-y-6">
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Project Name</label>
+            <input
+              type="text"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              placeholder="e.g. Website Redesign"
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-slate-700 placeholder-slate-400 text-sm font-bold"
+            />
+          </div>
+
           <div>
             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Your Name</label>
             <input
@@ -313,10 +331,10 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
 
           <button
             onClick={() => {
-              if (!text.trim() || !name.trim()) return;
-              onSubmit({ text, emoji, name });
+              if (!text.trim() || !name.trim() || !projectName.trim()) return;
+              onSubmit({ text, emoji, name, projectName });
             }}
-            disabled={!text.trim() || !name.trim()}
+            disabled={!text.trim() || !name.trim() || !projectName.trim()}
             className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-2"
           >
             <MapPin size={18} />
@@ -419,6 +437,11 @@ export default function App() {
   const [pendingPinX, setPendingPinX] = useState(null);
   const [dateFilter, setDateFilter] = useState('all'); // 'all', 'today', 'week', 'sprint'
   const [isExporting, setIsExporting] = useState(false);
+  
+  // Storybook Mode State
+  const [isStoryMode, setIsStoryMode] = useState(false);
+  const [storyDateIndex, setStoryDateIndex] = useState(0);
+  
   const chartRef = useRef(null);
 
   useEffect(() => {
@@ -453,7 +476,7 @@ export default function App() {
     setIsModalOpen(true);
   };
 
-  const handleSavePin = async ({ text, emoji, name }) => {
+  const handleSavePin = async ({ text, emoji, name, projectName }) => {
     if (!user) return;
 
     try {
@@ -462,6 +485,7 @@ export default function App() {
         text,
         emoji,
         name,
+        projectName,
         uid: user.uid,
         createdAt: serverTimestamp()
       });
@@ -510,7 +534,33 @@ export default function App() {
     });
   };
 
-  const filteredPins = useMemo(() => filterPinsByDate(pins), [pins, dateFilter]);
+  // Get unique dates for Storybook Mode
+  const uniqueDates = useMemo(() => {
+    const dates = new Set();
+    pins.forEach(pin => {
+      if (pin.createdAt) {
+        const dateStr = new Date(pin.createdAt.seconds * 1000).toLocaleDateString();
+        dates.add(dateStr);
+      }
+    });
+    // Sort dates descending (newest first)
+    return Array.from(dates).sort((a, b) => new Date(b) - new Date(a));
+  }, [pins]);
+
+  // Derived state for displayed pins
+  const displayedPins = useMemo(() => {
+    if (isStoryMode) {
+      if (uniqueDates.length === 0) return [];
+      const targetDateStr = uniqueDates[storyDateIndex];
+      return pins.filter(pin => {
+        if (!pin.createdAt) return false;
+        return new Date(pin.createdAt.seconds * 1000).toLocaleDateString() === targetDateStr;
+      });
+    }
+    return filterPinsByDate(pins);
+  }, [pins, dateFilter, isStoryMode, storyDateIndex, uniqueDates]);
+
+  const filteredPins = displayedPins; // Alias for compatibility
 
   // Export screenshot
   const handleExportScreenshot = async () => {
@@ -574,34 +624,86 @@ export default function App() {
           </div>
         </header>
 
-        {/* Date Filter Buttons */}
-        <div className="flex flex-wrap items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-          <div className="flex items-center gap-2 text-slate-600 font-semibold">
-            <Filter size={18} />
-            <span className="text-sm">Filter by:</span>
+        {/* Controls: Date Filter OR Storybook Mode */}
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
+          
+          <div className="flex items-center gap-4">
+            {/* Storybook Toggle */}
+            <button
+              onClick={() => {
+                setIsStoryMode(!isStoryMode);
+                setStoryDateIndex(0); // Reset to newest date
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all ${
+                isStoryMode 
+                  ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400' 
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              <span className="text-xl">📖</span>
+              {isStoryMode ? 'Exit Storybook' : 'Storybook Mode'}
+            </button>
+
+            {isStoryMode && uniqueDates.length > 0 && (
+              <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
+                <button
+                  onClick={() => setStoryDateIndex(Math.min(uniqueDates.length - 1, storyDateIndex + 1))}
+                  disabled={storyDateIndex >= uniqueDates.length - 1}
+                  className="p-2 hover:bg-white rounded-md disabled:opacity-30 transition-colors"
+                  title="Previous Day"
+                >
+                  ←
+                </button>
+                <div className="px-2 text-center min-w-[120px]">
+                  <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Viewing</div>
+                  <div className="font-bold text-slate-700">{uniqueDates[storyDateIndex]}</div>
+                </div>
+                <button
+                  onClick={() => setStoryDateIndex(Math.max(0, storyDateIndex - 1))}
+                  disabled={storyDateIndex <= 0}
+                  className="p-2 hover:bg-white rounded-md disabled:opacity-30 transition-colors"
+                  title="Next Day"
+                >
+                  →
+                </button>
+              </div>
+            )}
           </div>
-          <div className="flex gap-2">
-            {[
-              { value: 'all', label: 'All Time' },
-              { value: 'today', label: 'Today' },
-              { value: 'week', label: 'Last Week' },
-              { value: 'sprint', label: 'Current Sprint (2 weeks)' }
-            ].map(filter => (
-              <button
-                key={filter.value}
-                onClick={() => setDateFilter(filter.value)}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-                  dateFilter === filter.value
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
-          <div className="ml-auto text-sm text-slate-500">
-            Showing {filteredPins.length} of {pins.length} updates
+
+          {!isStoryMode && (
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2 text-slate-600 font-semibold">
+                <Filter size={18} />
+                <span className="text-sm">Filter:</span>
+              </div>
+              <div className="flex gap-2">
+                {[
+                  { value: 'all', label: 'All Time' },
+                  { value: 'today', label: 'Today' },
+                  { value: 'week', label: 'Last Week' },
+                  { value: 'sprint', label: 'Sprint' }
+                ].map(filter => (
+                  <button
+                    key={filter.value}
+                    onClick={() => setDateFilter(filter.value)}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${
+                      dateFilter === filter.value
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="text-sm text-slate-500 font-medium">
+            {isStoryMode 
+              ? `Page ${uniqueDates.length - storyDateIndex} of ${uniqueDates.length}`
+              : `${filteredPins.length} updates`
+            }
           </div>
         </div>
 
@@ -630,6 +732,11 @@ export default function App() {
                   <div className="text-2xl bg-slate-50 p-2 rounded-lg">{pin.emoji}</div>
                   <div className="flex-1">
                     <p className="text-slate-700 text-sm leading-relaxed mb-2">{pin.text}</p>
+                    {pin.projectName && (
+                      <div className="inline-block bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-indigo-100 mb-2">
+                        {pin.projectName}
+                      </div>
+                    )}
                     {pin.name && (
                       <p className="text-xs font-semibold text-blue-600 mb-1">👤 {pin.name}</p>
                     )}
@@ -666,6 +773,11 @@ export default function App() {
                   <div className="text-2xl bg-slate-50 p-2 rounded-lg">{pin.emoji}</div>
                   <div className="flex-1">
                     <p className="text-slate-700 text-sm leading-relaxed mb-2">{pin.text}</p>
+                    {pin.projectName && (
+                      <div className="inline-block bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-indigo-100 mb-2">
+                        {pin.projectName}
+                      </div>
+                    )}
                     {pin.name && (
                       <p className="text-xs font-semibold text-blue-600 mb-1">👤 {pin.name}</p>
                     )}
