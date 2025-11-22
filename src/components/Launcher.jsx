@@ -1,5 +1,5 @@
 import React from 'react';
-import { LogOut, TrendingUp, Smile, MessageSquare } from 'lucide-react';
+import { LogOut, TrendingUp, Smile, MessageSquare, CheckSquare } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -81,6 +81,24 @@ const Launcher = ({ onSelectApp, user }) => {
                         <h3 className="text-xl font-bold text-slate-900 mb-2">Retro Board</h3>
                         <p className="text-slate-500 text-sm leading-relaxed">
                             Run team retrospectives with sweet fruits, awesome peeps, pirates, and action items.
+                        </p>
+                    </button>
+
+                    {/* Habit Tracker Card */}
+                    <button
+                        onClick={() => onSelectApp('habit-tracker')}
+                        className="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl hover:border-indigo-200 transition-all text-left relative overflow-hidden"
+                    >
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <CheckSquare size={120} className="text-indigo-600" />
+                        </div>
+
+                        <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <CheckSquare size={24} />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-900 mb-2">Habit Tracker</h3>
+                        <p className="text-slate-500 text-sm leading-relaxed">
+                            Track team habits and routines. See who's building good practices.
                         </p>
                     </button>
                 </div>
