@@ -468,6 +468,7 @@ const HillChartApp = ({ user, onBack }) => {
     const [pins, setPins] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isReportOpen, setIsReportOpen] = useState(false);
+    const [isReportComingSoonOpen, setIsReportComingSoonOpen] = useState(false);
     const [pendingPinX, setPendingPinX] = useState(null);
     const [dateFilter, setDateFilter] = useState('all'); // 'all', 'today', 'week', 'sprint'
     const [isExporting, setIsExporting] = useState(false);
@@ -652,7 +653,7 @@ const HillChartApp = ({ user, onBack }) => {
                             {isExporting ? 'Exporting...' : 'Export Screenshot'}
                         </button>
                         <button
-                            onClick={() => setIsReportOpen(true)}
+                            onClick={() => setIsReportComingSoonOpen(true)}
                             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-full shadow-md hover:shadow-lg transition-all"
                         >
                             <Sparkles size={16} />
@@ -848,6 +849,14 @@ const HillChartApp = ({ user, onBack }) => {
                     isOpen={isReportOpen}
                     onClose={() => setIsReportOpen(false)}
                     pins={pins}
+                />
+
+                <ComingSoonModal
+                    isOpen={isReportComingSoonOpen}
+                    onClose={() => setIsReportComingSoonOpen(false)}
+                    featureName="generateReport"
+                    featureTitle="AI Reports Coming Soon"
+                    featureDescription="We're working on AI-powered status reports. This feature will automatically generate comprehensive project summaries based on your hill chart progress."
                 />
 
             </div>
