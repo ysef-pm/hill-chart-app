@@ -1,5 +1,5 @@
 import React from 'react';
-import { LogOut, TrendingUp, Smile, MessageSquare, CheckSquare } from 'lucide-react';
+import { LogOut, TrendingUp, Smile, MessageSquare, CheckSquare, Heart, BookOpen } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -101,6 +101,46 @@ const Launcher = ({ onSelectApp, user }) => {
                             Track team habits and routines. See who's building good practices.
                         </p>
                     </button>
+
+                    {/* Kudos Board Card - Coming Soon */}
+                    <div className="relative bg-slate-50 p-6 rounded-2xl border border-dashed border-slate-300 text-left overflow-hidden opacity-60">
+                        <div className="absolute top-3 right-3">
+                            <span className="px-2 py-1 bg-slate-200 text-slate-500 text-xs font-medium rounded-full">
+                                Coming Soon
+                            </span>
+                        </div>
+                        <div className="absolute top-0 right-0 p-4 opacity-5">
+                            <Heart size={120} className="text-slate-400" />
+                        </div>
+
+                        <div className="w-12 h-12 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center mb-4">
+                            <Heart size={24} />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-400 mb-2">Kudos Board</h3>
+                        <p className="text-slate-400 text-sm leading-relaxed">
+                            Celebrate wins and give shoutouts to teammates for great work.
+                        </p>
+                    </div>
+
+                    {/* Decision Log Card - Coming Soon */}
+                    <div className="relative bg-slate-50 p-6 rounded-2xl border border-dashed border-slate-300 text-left overflow-hidden opacity-60">
+                        <div className="absolute top-3 right-3">
+                            <span className="px-2 py-1 bg-slate-200 text-slate-500 text-xs font-medium rounded-full">
+                                Coming Soon
+                            </span>
+                        </div>
+                        <div className="absolute top-0 right-0 p-4 opacity-5">
+                            <BookOpen size={120} className="text-slate-400" />
+                        </div>
+
+                        <div className="w-12 h-12 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center mb-4">
+                            <BookOpen size={24} />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-400 mb-2">Decision Log</h3>
+                        <p className="text-slate-400 text-sm leading-relaxed">
+                            Record team decisions with context so you never forget why.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
