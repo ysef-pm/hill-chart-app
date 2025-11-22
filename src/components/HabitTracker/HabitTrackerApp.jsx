@@ -1,7 +1,7 @@
 // src/components/HabitTracker/HabitTrackerApp.jsx
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Users, User, Copy, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Plus, Users, User, Copy, Check, ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
 import { useTeamHabits } from './hooks/useTeamHabits';
 import { DAYS_OF_WEEK, getWeekStart, getWeekDates, formatDate } from './constants';
 import TeamSetupModal from './TeamSetupModal';
@@ -22,6 +22,7 @@ const HabitTrackerApp = ({ user, onBack }) => {
     toggleCheck,
     isCheckedByUser,
     getCheckersForDate,
+    leaveTeam,
   } = useTeamHabits(user);
 
   const [showTeamSetup, setShowTeamSetup] = useState(false);
@@ -36,10 +37,10 @@ const HabitTrackerApp = ({ user, onBack }) => {
   weekStart.setDate(weekStart.getDate() + weekOffset * 7);
   const weekDates = getWeekDates(weekStart);
 
-  // Show setup modal if no team
+  // Show setup modal if no team, close it if team exists
   useEffect(() => {
-    if (!loading && !teamId) {
-      setShowTeamSetup(true);
+    if (!loading) {
+      setShowTeamSetup(!teamId);
     }
   }, [loading, teamId]);
 
@@ -90,22 +91,35 @@ const HabitTrackerApp = ({ user, onBack }) => {
 
           {teamId && (
             <div className="flex items-center gap-2">
+              {/* Leave Team Button */}
+              <button
+                onClick={() => {
+                  console.log('[HabitTrackerApp] Leave Team button clicked');
+                  if (window.confirm('Are you sure you want to leave this team?')) {
+                    console.log('[HabitTrackerApp] Calling leaveTeam...');
+                    leaveTeam();
+                  }
+                }}
+                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                title="Leave Team"
+              >
+                <LogOut size={20} />
+              </button>
+
               {/* View toggle */}
               <div className="flex bg-slate-100 rounded-lg p-1">
                 <button
                   onClick={() => setShowTeamView(false)}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                    !showTeamView ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'
-                  }`}
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${!showTeamView ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'
+                    }`}
                 >
                   <User size={16} />
                   My View
                 </button>
                 <button
                   onClick={() => setShowTeamView(true)}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                    showTeamView ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'
-                  }`}
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${showTeamView ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'
+                    }`}
                 >
                   <Users size={16} />
                   Team
@@ -168,9 +182,8 @@ const HabitTrackerApp = ({ user, onBack }) => {
                     return (
                       <th
                         key={date}
-                        className={`py-3 px-2 text-center text-sm font-medium w-[60px] ${
-                          isToday ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600'
-                        }`}
+                        className={`py-3 px-2 text-center text-sm font-medium w-[60px] ${isToday ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600'
+                          }`}
                       >
                         <div>{day?.short}</div>
                         <div className="text-xs font-normal">{formatDate(date)}</div>

@@ -103,14 +103,20 @@ export const useTeamHabits = (user) => {
   }, [teamId, habits.length]);
 
   const createTeam = useCallback(async (teamName) => {
-    if (!user) return null;
+    console.log('[useTeamHabits] createTeam called with:', teamName);
+    if (!user) {
+      console.log('[useTeamHabits] No user, returning null');
+      return null;
+    }
     setLoading(true);
     setError(null);
 
     try {
       const code = generateTeamCode();
+      console.log('[useTeamHabits] Generated team code:', code);
       const teamRef = doc(db, 'teams', code);
 
+      console.log('[useTeamHabits] Creating team document...');
       await setDoc(teamRef, {
         name: teamName || 'My Team',
         createdAt: serverTimestamp(),
@@ -118,16 +124,19 @@ export const useTeamHabits = (user) => {
         memberIds: [user.uid],
       });
 
+      console.log('[useTeamHabits] Updating user document...');
       // Update user's teamId
       await setDoc(doc(db, 'users', user.uid), {
         teamId: code,
         displayName: user.displayName || 'Anonymous',
       }, { merge: true });
 
+      console.log('[useTeamHabits] Team created successfully');
       setTeamId(code);
       setLoading(false);
       return code;
     } catch (err) {
+      console.error('[useTeamHabits] Error creating team:', err);
       setError(err.message);
       setLoading(false);
       return null;
@@ -237,15 +246,23 @@ export const useTeamHabits = (user) => {
   }, [checks]);
 
   const leaveTeam = useCallback(async () => {
-    if (!user?.uid) return;
+    console.log('[useTeamHabits] leaveTeam called for user:', user?.uid);
+    if (!user?.uid) {
+      console.log('[useTeamHabits] No user, returning');
+      return;
+    }
 
     try {
+      console.log('[useTeamHabits] Updating user document to remove teamId...');
       await updateDoc(doc(db, 'users', user.uid), { teamId: null });
+      console.log('[useTeamHabits] User document updated, resetting local state...');
       setTeamId(null);
       setTeam(null);
       setHabits([]);
       setChecks({});
+      console.log('[useTeamHabits] Local state reset');
     } catch (err) {
+      console.error('[useTeamHabits] Error leaving team:', err);
       setError(err.message);
     }
   }, [user?.uid]);

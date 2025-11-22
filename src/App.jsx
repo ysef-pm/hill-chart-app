@@ -1,27 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import Login from './components/Login';
-import Launcher from './components/Launcher';
-import HillChartApp from './components/HillChartApp';
-import { FeelingsWheelApp } from './components/FeelingsWheel';
-import { RetroBoardApp } from './components/RetroBoard';
-import { HabitTrackerApp } from './components/HabitTracker';
+import Landing from './pages/Landing';
+import Dashboard from './pages/Dashboard';
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
-  const [currentApp, setCurrentApp] = useState(null); // null = Launcher, 'hill-chart' = HillChartApp
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoadingAuth(false);
-      // Reset to launcher on logout
-      if (!currentUser) {
-        setCurrentApp(null);
-      }
     });
     return () => unsubscribe();
   }, []);
@@ -34,25 +27,27 @@ export default function App() {
     );
   }
 
-  if (!user) {
-    return <Login />;
-  }
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Public Landing Page */}
+        <Route path="/" element={<Landing />} />
 
-  if (currentApp === 'hill-chart') {
-    return <HillChartApp user={user} onBack={() => setCurrentApp(null)} />;
-  }
+        {/* Login Page - redirects to app if already logged in */}
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/app" replace /> : <Login />}
+        />
 
-  if (currentApp === 'feelings-wheel') {
-    return <FeelingsWheelApp user={user} onBack={() => setCurrentApp(null)} />;
-  }
+        {/* Protected App Routes */}
+        <Route
+          path="/app/*"
+          element={user ? <Dashboard user={user} /> : <Navigate to="/login" replace />}
+        />
 
-  if (currentApp === 'retro-board') {
-    return <RetroBoardApp user={user} onBack={() => setCurrentApp(null)} />;
-  }
-
-  if (currentApp === 'habit-tracker') {
-    return <HabitTrackerApp user={user} onBack={() => setCurrentApp(null)} />;
-  }
-
-  return <Launcher user={user} onSelectApp={setCurrentApp} />;
+        {/* Catch all - redirect to landing */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }

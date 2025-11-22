@@ -11,10 +11,10 @@ const TeamSetupModal = ({ isOpen, onClose, onCreateTeam, onJoinTeam, loading }) 
   if (!isOpen) return null;
 
   const handleCreate = async () => {
+    console.log('[TeamSetupModal] handleCreate called with:', teamName);
     const code = await onCreateTeam(teamName);
-    if (code) {
-      onClose();
-    }
+    console.log('[TeamSetupModal] onCreateTeam returned code:', code);
+    // Don't call onClose() here - let the parent close it when teamId updates
   };
 
   const handleJoin = async () => {

@@ -56,14 +56,20 @@ export const useRetroRoom = (user) => {
   }, [roomCode, user?.uid]);
 
   const createRoom = useCallback(async (retroName, userName, avatarColor) => {
-    if (!user) return null;
+    console.log('[useRetroRoom] createRoom called with:', { retroName, userName, avatarColor, user: user?.uid });
+    if (!user) {
+      console.log('[useRetroRoom] No user, returning null');
+      return null;
+    }
     setLoading(true);
     setError(null);
 
     try {
       const code = generateRoomCode();
+      console.log('[useRetroRoom] Generated room code:', code);
       const roomRef = ref(rtdb, `retroRooms/${code}`);
 
+      console.log('[useRetroRoom] Attempting to create room in Firebase...');
       await set(roomRef, {
         name: retroName || 'Team Retro',
         createdAt: serverTimestamp(),
@@ -80,10 +86,13 @@ export const useRetroRoom = (user) => {
         items: {},
       });
 
+      console.log('[useRetroRoom] Room created successfully in Firebase');
       setRoomCode(code);
       setLoading(false);
+      console.log('[useRetroRoom] Returning code:', code);
       return code;
     } catch (err) {
+      console.error('[useRetroRoom] Error creating room:', err);
       setError(err.message);
       setLoading(false);
       return null;

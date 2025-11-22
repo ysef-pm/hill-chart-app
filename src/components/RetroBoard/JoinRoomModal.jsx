@@ -14,10 +14,14 @@ const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loadin
   if (!isOpen) return null;
 
   const handleCreate = async () => {
+    console.log('[JoinRoomModal] handleCreate called with:', { retroName, userName, selectedColor });
     const code = await onCreateRoom(retroName, userName, selectedColor);
-    if (code) {
-      onClose();
+    console.log('[JoinRoomModal] onCreateRoom returned code:', code);
+    if (!code) {
+      console.log('[JoinRoomModal] Room creation failed, code is null');
     }
+    // Don't call onClose() here - let the useEffect in RetroBoardApp close the modal
+    // when roomCode updates to avoid race condition
   };
 
   const handleJoin = async () => {
@@ -136,9 +140,8 @@ const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loadin
                     <button
                       key={color}
                       onClick={() => setSelectedColor(color)}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform ${
-                        selectedColor === color ? 'ring-2 ring-offset-2 ring-slate-400 scale-110' : ''
-                      }`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform ${selectedColor === color ? 'ring-2 ring-offset-2 ring-slate-400 scale-110' : ''
+                        }`}
                       style={{ backgroundColor: color }}
                     >
                       {selectedColor === color && (
@@ -161,11 +164,10 @@ const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loadin
                 <button
                   onClick={mode === 'create' ? handleCreate : handleJoin}
                   disabled={loading || (mode === 'join' && roomCode.length !== 6)}
-                  className={`flex-1 px-4 py-2 text-white rounded-lg font-medium disabled:opacity-50 ${
-                    mode === 'create'
-                      ? 'bg-emerald-500 hover:bg-emerald-600'
-                      : 'bg-sky-500 hover:bg-sky-600'
-                  }`}
+                  className={`flex-1 px-4 py-2 text-white rounded-lg font-medium disabled:opacity-50 ${mode === 'create'
+                    ? 'bg-emerald-500 hover:bg-emerald-600'
+                    : 'bg-sky-500 hover:bg-sky-600'
+                    }`}
                 >
                   {loading ? 'Loading...' : mode === 'create' ? 'Create Room' : 'Join Room'}
                 </button>

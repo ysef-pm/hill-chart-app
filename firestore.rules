@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user is a member of the team
+    function isTeamMember(teamId) {
+      let team = get(/databases/$(database)/documents/teams/$(teamId));
+      return isAuthenticated() && team != null && request.auth.uid in team.data.memberIds;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Teams collection
+    match /teams/{teamId} {
+      // Allow creating a new team
+      allow create: if isAuthenticated();
+      
+      // Allow reading and updating if user is a member
+      allow read, update: if isTeamMember(teamId);
+      
+      // Habits subcollection
+      match /habits/{habitId} {
+        allow read, write: if isTeamMember(teamId);
+        
+        // Checks subcollection
+        match /checks/{checkId} {
+          allow read, write: if isTeamMember(teamId);
+        }
+      }
+    }
+  }
+}
