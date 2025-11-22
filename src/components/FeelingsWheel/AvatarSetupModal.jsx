@@ -1,18 +1,23 @@
 // src/components/FeelingsWheel/AvatarSetupModal.jsx
 
 import React, { useState } from 'react';
-import { X, Check } from 'lucide-react';
+import { X, Check, Loader2 } from 'lucide-react';
 import Avatar from './Avatar';
 import { AVATAR_STYLES, AVATAR_COLORS, getInitials, getRandomColor } from './constants';
 
-const AvatarSetupModal = ({ user, onComplete, initialColor }) => {
+const AvatarSetupModal = ({ user, onComplete, initialColor, loading, error }) => {
   const name = user?.displayName || 'Anonymous';
   const [avatarStyle, setAvatarStyle] = useState('initials');
   const [avatarColor, setAvatarColor] = useState(initialColor || getRandomColor());
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleComplete = () => {
-    onComplete(name, avatarStyle, avatarColor);
+  const handleComplete = async () => {
+    setIsSubmitting(true);
+    await onComplete(name, avatarStyle, avatarColor);
+    setIsSubmitting(false);
   };
+
+  const isLoading = loading || isSubmitting;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -79,11 +84,25 @@ const AvatarSetupModal = ({ user, onComplete, initialColor }) => {
             </div>
           </div>
 
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+              {error}
+            </div>
+          )}
+
           <button
             onClick={handleComplete}
-            className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors"
+            disabled={isLoading}
+            className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
           >
-            Join Session
+            {isLoading ? (
+              <>
+                <Loader2 size={20} className="animate-spin" />
+                Joining...
+              </>
+            ) : (
+              'Join Session'
+            )}
           </button>
         </div>
       </div>

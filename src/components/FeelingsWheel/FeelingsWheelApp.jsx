@@ -48,13 +48,19 @@ const FeelingsWheelApp = ({ user, onBack }) => {
   };
 
   const handleAvatarComplete = async (name, avatarStyle, avatarColor) => {
+    let success = false;
     if (pendingRoomAction?.type === 'create') {
-      await createRoom(name, avatarStyle, avatarColor);
+      const code = await createRoom(name, avatarStyle, avatarColor);
+      success = !!code;
     } else if (pendingRoomAction?.type === 'join') {
-      await joinRoom(pendingRoomAction.code, name, avatarStyle, avatarColor);
+      success = await joinRoom(pendingRoomAction.code, name, avatarStyle, avatarColor);
     }
-    setShowAvatarSetup(false);
-    setPendingRoomAction(null);
+
+    // Only close modal if operation succeeded
+    if (success) {
+      setShowAvatarSetup(false);
+      setPendingRoomAction(null);
+    }
   };
 
   const handleSelectFeeling = (primary, secondary, tertiary) => {
@@ -92,6 +98,8 @@ const FeelingsWheelApp = ({ user, onBack }) => {
         user={user}
         onComplete={handleAvatarComplete}
         initialColor={initialColor}
+        loading={loading}
+        error={error}
       />
     );
   }
