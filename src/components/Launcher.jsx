@@ -48,19 +48,23 @@ const Launcher = ({ onSelectApp, user }) => {
                         </p>
                     </button>
 
-                    {/* Feelings Wheel Card (Coming Soon) */}
-                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 border-dashed relative opacity-75 cursor-not-allowed">
-                        <div className="w-12 h-12 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center mb-4">
+                    {/* Feelings Wheel Card */}
+                    <button
+                        onClick={() => onSelectApp('feelings-wheel')}
+                        className="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl hover:border-purple-200 transition-all text-left relative overflow-hidden"
+                    >
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Smile size={120} className="text-purple-600" />
+                        </div>
+
+                        <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                             <Smile size={24} />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-400 mb-2">Feelings Wheel</h3>
-                        <p className="text-slate-400 text-sm leading-relaxed">
-                            A tool to help developers express how they are feeling during standups and retrospectives.
+                        <h3 className="text-xl font-bold text-slate-900 mb-2">Feelings Wheel</h3>
+                        <p className="text-slate-500 text-sm leading-relaxed">
+                            Share how you're feeling during standups and retrospectives with your team.
                         </p>
-                        <div className="absolute top-4 right-4 bg-slate-200 text-slate-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
-                            Coming Soon
-                        </div>
-                    </div>
+                    </button>
                 </div>
             </div>
         </div>
