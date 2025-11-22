@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { X, Users, Plus } from 'lucide-react';
 import { AVATAR_COLORS, getInitials } from './constants';
 
-const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loading }) => {
+const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loading, error }) => {
   const [mode, setMode] = useState('choose'); // 'choose' | 'create' | 'join'
   const [retroName, setRetroName] = useState('');
   const [userName, setUserName] = useState(user?.displayName || '');
@@ -15,20 +15,13 @@ const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loadin
 
   const handleCreate = async () => {
     console.log('[JoinRoomModal] handleCreate called with:', { retroName, userName, selectedColor });
-    const code = await onCreateRoom(retroName, userName, selectedColor);
-    console.log('[JoinRoomModal] onCreateRoom returned code:', code);
-    if (!code) {
-      console.log('[JoinRoomModal] Room creation failed, code is null');
-    }
+    await onCreateRoom(retroName, userName, selectedColor);
     // Don't call onClose() here - let the useEffect in RetroBoardApp close the modal
-    // when roomCode updates to avoid race condition
   };
 
   const handleJoin = async () => {
-    const success = await onJoinRoom(roomCode.toUpperCase(), userName, selectedColor);
-    if (success) {
-      onClose();
-    }
+    await onJoinRoom(roomCode.toUpperCase(), userName, selectedColor);
+    // Don't call onClose() here - let the useEffect in RetroBoardApp close the modal
   };
 
   const resetAndClose = () => {
@@ -153,6 +146,12 @@ const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loadin
                   ))}
                 </div>
               </div>
+
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                  {error}
+                </div>
+              )}
 
               <div className="flex gap-2 pt-4">
                 <button

@@ -106,11 +106,10 @@ const RetroBoardApp = ({ user, onBack }) => {
               {isHost && (
                 <button
                   onClick={room?.isRevealed ? hideAll : revealAll}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${
-                    room?.isRevealed
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${room?.isRevealed
                       ? 'bg-slate-200 text-slate-700 hover:bg-slate-300'
                       : 'bg-emerald-500 text-white hover:bg-emerald-600'
-                  }`}
+                    }`}
                 >
                   {room?.isRevealed ? <EyeOff size={18} /> : <Eye size={18} />}
                   {room?.isRevealed ? 'Hide All' : 'Reveal All'}
@@ -177,6 +176,7 @@ const RetroBoardApp = ({ user, onBack }) => {
         onJoinRoom={joinRoom}
         user={user}
         loading={loading}
+        error={error}
       />
 
       <AddItemModal

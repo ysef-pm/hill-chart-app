@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { X, Users, Plus } from 'lucide-react';
 
-const TeamSetupModal = ({ isOpen, onClose, onCreateTeam, onJoinTeam, loading }) => {
+const TeamSetupModal = ({ isOpen, onClose, onCreateTeam, onJoinTeam, loading, error }) => {
   const [mode, setMode] = useState('choose'); // 'choose' | 'create' | 'join'
   const [teamName, setTeamName] = useState('');
   const [teamCode, setTeamCode] = useState('');
@@ -12,20 +12,15 @@ const TeamSetupModal = ({ isOpen, onClose, onCreateTeam, onJoinTeam, loading }) 
 
   const handleCreate = async () => {
     console.log('[TeamSetupModal] handleCreate called with:', teamName);
-    const code = await onCreateTeam(teamName);
-    console.log('[TeamSetupModal] onCreateTeam returned code:', code);
+    await onCreateTeam(teamName);
     // Don't call onClose() here - let the parent close it when teamId updates
   };
 
   console.log('[TeamSetupModal] Render:', { isOpen, mode, teamName, teamCode });
 
   const handleJoin = async () => {
-    const success = await onJoinTeam(teamCode.toUpperCase());
-    console.log('[TeamSetupModal] onJoinTeam result:', success);
-    if (success) {
-      console.log('[TeamSetupModal] Join success, calling onClose()');
-      onClose();
-    }
+    await onJoinTeam(teamCode.toUpperCase());
+    // Don't call onClose() here - let the parent close it when teamId updates
   };
 
   const resetAndClose = () => {
@@ -101,6 +96,12 @@ const TeamSetupModal = ({ isOpen, onClose, onCreateTeam, onJoinTeam, loading }) 
                 />
               </div>
 
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm mb-4">
+                  {error}
+                </div>
+              )}
+
               <div className="flex gap-2 pt-4">
                 <button
                   onClick={() => setMode('choose')}
@@ -134,6 +135,12 @@ const TeamSetupModal = ({ isOpen, onClose, onCreateTeam, onJoinTeam, loading }) 
                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 uppercase tracking-widest text-center text-xl font-mono"
                 />
               </div>
+
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm mb-4">
+                  {error}
+                </div>
+              )}
 
               <div className="flex gap-2 pt-4">
                 <button

@@ -246,6 +246,7 @@ const HabitTrackerApp = ({ user, onBack }) => {
         onCreateTeam={createTeam}
         onJoinTeam={joinTeam}
         loading={loading}
+        error={error}
       />
 
       <AddHabitModal
