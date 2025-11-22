@@ -1,5 +1,5 @@
 import React from 'react';
-import { LogOut, TrendingUp, Smile } from 'lucide-react';
+import { LogOut, TrendingUp, Smile, MessageSquare } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -63,6 +63,24 @@ const Launcher = ({ onSelectApp, user }) => {
                         <h3 className="text-xl font-bold text-slate-900 mb-2">Feelings Wheel</h3>
                         <p className="text-slate-500 text-sm leading-relaxed">
                             Share how you're feeling during standups and retrospectives with your team.
+                        </p>
+                    </button>
+
+                    {/* Retro Board Card */}
+                    <button
+                        onClick={() => onSelectApp('retro-board')}
+                        className="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl hover:border-emerald-200 transition-all text-left relative overflow-hidden"
+                    >
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <MessageSquare size={120} className="text-emerald-600" />
+                        </div>
+
+                        <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <MessageSquare size={24} />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-900 mb-2">Retro Board</h3>
+                        <p className="text-slate-500 text-sm leading-relaxed">
+                            Run team retrospectives with sweet fruits, awesome peeps, pirates, and action items.
                         </p>
                     </button>
                 </div>
