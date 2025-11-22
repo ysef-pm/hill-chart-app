@@ -39,10 +39,15 @@ const HabitTrackerApp = ({ user, onBack }) => {
 
   // Show setup modal if no team, close it if team exists
   useEffect(() => {
+    console.log('[HabitTrackerApp] useEffect check:', { loading, teamId, showTeamSetup });
     if (!loading) {
-      setShowTeamSetup(!teamId);
+      const shouldShow = !teamId;
+      if (showTeamSetup !== shouldShow) {
+        console.log('[HabitTrackerApp] Updating showTeamSetup to:', shouldShow);
+        setShowTeamSetup(shouldShow);
+      }
     }
-  }, [loading, teamId]);
+  }, [loading, teamId, showTeamSetup]);
 
   const handleCopyCode = () => {
     if (teamId) {
@@ -97,7 +102,8 @@ const HabitTrackerApp = ({ user, onBack }) => {
                   console.log('[HabitTrackerApp] Leave Team button clicked');
                   if (window.confirm('Are you sure you want to leave this team?')) {
                     console.log('[HabitTrackerApp] Calling leaveTeam...');
-                    leaveTeam();
+                    console.log('[HabitTrackerApp] Calling leaveTeam...');
+                    leaveTeam().then(() => console.log('[HabitTrackerApp] leaveTeam completed'));
                   }
                 }}
                 className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -236,7 +242,7 @@ const HabitTrackerApp = ({ user, onBack }) => {
       {/* Modals */}
       <TeamSetupModal
         isOpen={showTeamSetup}
-        onClose={() => teamId && setShowTeamSetup(false)}
+        onClose={() => setShowTeamSetup(false)}
         onCreateTeam={createTeam}
         onJoinTeam={joinTeam}
         loading={loading}

@@ -6,6 +6,7 @@ import { X } from 'lucide-react';
 const AddItemModal = ({ isOpen, onClose, onAdd, section, participants, currentUserId }) => {
   const [text, setText] = useState('');
   const [shoutoutTo, setShoutoutTo] = useState('');
+  const [isCustomShoutout, setIsCustomShoutout] = useState(false);
 
   if (!isOpen || !section) return null;
 
@@ -16,6 +17,7 @@ const AddItemModal = ({ isOpen, onClose, onAdd, section, participants, currentUs
     onAdd(section.id, text.trim(), section.hasShoutout ? shoutoutTo : null);
     setText('');
     setShoutoutTo('');
+    setIsCustomShoutout(false);
     onClose();
   };
 
@@ -23,6 +25,11 @@ const AddItemModal = ({ isOpen, onClose, onAdd, section, participants, currentUs
   const otherParticipants = Object.entries(participants || {})
     .filter(([id]) => id !== currentUserId)
     .map(([id, p]) => ({ id, name: p.name }));
+
+  // DEBUG: Add fake participant
+  otherParticipants.push({ id: 'fake-alice', name: 'Alice' });
+
+  console.log('Render: shoutoutTo=', shoutoutTo, 'isCustomShoutout=', isCustomShoutout);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -46,8 +53,17 @@ const AddItemModal = ({ isOpen, onClose, onAdd, section, participants, currentUs
                 Who are you shouting out?
               </label>
               <select
-                value={shoutoutTo}
-                onChange={(e) => setShoutoutTo(e.target.value)}
+                value={isCustomShoutout ? '__custom__' : shoutoutTo}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '__custom__') {
+                    setIsCustomShoutout(true);
+                    setShoutoutTo('');
+                  } else {
+                    setIsCustomShoutout(false);
+                    setShoutoutTo(value);
+                  }
+                }}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
               >
                 <option value="">Select a teammate...</option>
@@ -56,10 +72,11 @@ const AddItemModal = ({ isOpen, onClose, onAdd, section, participants, currentUs
                 ))}
                 <option value="__custom__">Someone else...</option>
               </select>
-              {shoutoutTo === '__custom__' && (
+              {isCustomShoutout && (
                 <input
                   type="text"
                   placeholder="Enter their name"
+                  value={shoutoutTo}
                   onChange={(e) => setShoutoutTo(e.target.value)}
                   className="w-full mt-2 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 />
