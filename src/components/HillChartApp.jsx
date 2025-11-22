@@ -430,6 +430,32 @@ const ReportModal = ({ isOpen, onClose, pins }) => {
     );
 };
 
+const ComingSoonModal = ({ isOpen, onClose, featureName, featureTitle, featureDescription }) => {
+    useEffect(() => {
+        if (isOpen && featureName) {
+            trackFeatureInterest(featureName);
+        }
+    }, [isOpen, featureName]);
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100 p-6 m-4 text-center">
+                <div className="text-6xl mb-4">🚧</div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">{featureTitle || 'Coming Soon'}</h3>
+                <p className="text-slate-500 mb-6 leading-relaxed">{featureDescription}</p>
+                <button
+                    onClick={onClose}
+                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-95"
+                >
+                    Got it
+                </button>
+            </div>
+        </div>
+    );
+};
+
 const HillChartApp = ({ user, onBack }) => {
     const [pins, setPins] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
