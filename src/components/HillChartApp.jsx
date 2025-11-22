@@ -242,7 +242,7 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
     const [emoji, setEmoji] = useState('🤔');
     const [name, setName] = useState('');
     const [projectName, setProjectName] = useState('');
-    const [isSuggesting, setIsSuggesting] = useState(false);
+    const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -257,22 +257,8 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
 
     const isUphill = initialX < 50;
 
-    const handleSuggest = async () => {
-        if (!text.trim()) return;
-        setIsSuggesting(true);
-
-        const prompt = `
-      I am working on a project. I am using a "Hill Chart".
-      I am currently on the ${isUphill ? '"Uphill" (Figuring things out, high uncertainty)' : '"Downhill" (Execution, getting it done)'} side of the hill.
-      My current status update is: "${text}".
-
-      Please suggest 3 short, concrete, actionable bullet points (started with - ) for what I should likely do next to move this forward.
-      Keep it very brief and direct.
-    `;
-
-        const suggestion = await callGemini(prompt);
-        setText(prev => `${prev}\n\nSuggested Next Steps:\n${suggestion}`);
-        setIsSuggesting(false);
+    const handleSuggest = () => {
+        setIsComingSoonOpen(true);
     };
 
     return (
@@ -331,11 +317,11 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
                             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">What's the latest?</label>
                             <button
                                 onClick={handleSuggest}
-                                disabled={isSuggesting || !text.trim()}
+                                disabled={!text.trim()}
                                 className="text-xs flex items-center gap-1 text-indigo-600 hover:text-indigo-700 disabled:opacity-50 font-medium transition-colors"
                             >
-                                {isSuggesting ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                                {isSuggesting ? 'Thinking...' : 'Suggest Next Steps'}
+                                <Sparkles size={12} />
+                                Suggest Next Steps
                             </button>
                         </div>
                         <textarea
@@ -359,6 +345,13 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
                         Pin Update
                     </button>
                 </div>
+                <ComingSoonModal
+                    isOpen={isComingSoonOpen}
+                    onClose={() => setIsComingSoonOpen(false)}
+                    featureName="suggestNextSteps"
+                    featureTitle="AI Suggestions Coming Soon"
+                    featureDescription="We're working on AI-powered next step suggestions. This feature will help you figure out what to do next based on your current progress."
+                />
             </div>
         </div>
     );
