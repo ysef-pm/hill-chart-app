@@ -73,8 +73,8 @@ const TeamFeelingsTable = ({ isOpen, onClose, roomCode, participants }) => {
                             backgroundColor: FEELINGS_WHEEL[participant.feeling.primary]?.color,
                           }}
                         />
-                        <span className="text-slate-600">
-                          {participant.feeling.primary} → {participant.feeling.secondary} → {participant.feeling.tertiary}
+                        <span className="text-slate-700 font-medium">
+                          {participant.feeling.tertiary}
                         </span>
                       </div>
                     </td>

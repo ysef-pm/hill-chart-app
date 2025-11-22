@@ -139,6 +139,8 @@ const FeelingsWheelApp = ({ user, onBack }) => {
           <Wheel
             onSelectFeeling={handleSelectFeeling}
             disabled={!!currentUser?.feeling}
+            isRevealed={isRevealed}
+            participants={participants}
           />
         </div>
 

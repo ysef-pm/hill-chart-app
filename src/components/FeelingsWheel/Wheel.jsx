@@ -2,8 +2,9 @@
 
 import React, { useState, useMemo } from 'react';
 import { FEELINGS_WHEEL } from './constants';
+import { getInitials } from './constants';
 
-const Wheel = ({ onSelectFeeling, disabled = false }) => {
+const Wheel = ({ onSelectFeeling, disabled = false, isRevealed = false, participants = {} }) => {
   const [selectedPrimary, setSelectedPrimary] = useState(null);
   const [selectedSecondary, setSelectedSecondary] = useState(null);
   const [hoveredSegment, setHoveredSegment] = useState(null);
@@ -31,6 +32,17 @@ const Wheel = ({ onSelectFeeling, disabled = false }) => {
     return `M ${x1} ${y1} L ${x2} ${y2} A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${x3} ${y3} L ${x4} ${y4} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${x1} ${y1} Z`;
   };
 
+  // Calculate center point of a segment (for placing avatars)
+  const getSegmentCenter = (startAngle, endAngle, innerRadius, outerRadius) => {
+    const midAngle = (startAngle + endAngle) / 2;
+    const midRadius = (innerRadius + outerRadius) / 2;
+    const angleRad = (midAngle - 90) * (Math.PI / 180);
+    return {
+      x: centerX + midRadius * Math.cos(angleRad),
+      y: centerY + midRadius * Math.sin(angleRad),
+    };
+  };
+
   // Lighten color for secondary/tertiary
   const lightenColor = (color, amount) => {
     const hex = color.replace('#', '');
@@ -41,7 +53,7 @@ const Wheel = ({ onSelectFeeling, disabled = false }) => {
   };
 
   const handlePrimaryClick = (emotion) => {
-    if (disabled) return;
+    if (disabled || isRevealed) return;
     if (selectedPrimary === emotion) {
       setSelectedPrimary(null);
       setSelectedSecondary(null);
@@ -52,7 +64,7 @@ const Wheel = ({ onSelectFeeling, disabled = false }) => {
   };
 
   const handleSecondaryClick = (emotion) => {
-    if (disabled) return;
+    if (disabled || isRevealed) return;
     if (selectedSecondary === emotion) {
       setSelectedSecondary(null);
     } else {
@@ -61,23 +73,27 @@ const Wheel = ({ onSelectFeeling, disabled = false }) => {
   };
 
   const handleTertiaryClick = (tertiary) => {
-    if (disabled) return;
+    if (disabled || isRevealed) return;
     onSelectFeeling(selectedPrimary, selectedSecondary, tertiary);
     setSelectedPrimary(null);
     setSelectedSecondary(null);
   };
 
-  // Build segments
-  const segments = useMemo(() => {
+  // Build segments and avatar positions
+  const { segments, avatarPositions } = useMemo(() => {
     const result = [];
+    const avatars = [];
     const primaryAngle = 360 / primaryEmotions.length;
+
+    // Build a map of tertiary -> segment info for avatar placement
+    const tertiarySegmentMap = {};
 
     primaryEmotions.forEach((primary, i) => {
       const startAngle = i * primaryAngle;
       const endAngle = (i + 1) * primaryAngle;
       const data = FEELINGS_WHEEL[primary];
 
-      // Primary segment (inner ring)
+      // Primary segment (inner ring) - always shown
       result.push({
         type: 'primary',
         emotion: primary,
@@ -87,11 +103,13 @@ const Wheel = ({ onSelectFeeling, disabled = false }) => {
         endAngle,
       });
 
-      // Secondary segments (middle ring) - only if this primary is selected
-      if (selectedPrimary === primary) {
-        const secondaryEmotions = Object.keys(data.secondary);
-        const secondaryAngle = (endAngle - startAngle) / secondaryEmotions.length;
+      const secondaryEmotions = Object.keys(data.secondary);
+      const secondaryAngle = (endAngle - startAngle) / secondaryEmotions.length;
 
+      // In revealed mode OR when this primary is selected, show secondary
+      const showSecondary = isRevealed || selectedPrimary === primary;
+
+      if (showSecondary) {
         secondaryEmotions.forEach((secondary, j) => {
           const secStart = startAngle + j * secondaryAngle;
           const secEnd = startAngle + (j + 1) * secondaryAngle;
@@ -106,11 +124,13 @@ const Wheel = ({ onSelectFeeling, disabled = false }) => {
             endAngle: secEnd,
           });
 
-          // Tertiary segments (outer ring) - only if this secondary is selected
-          if (selectedSecondary === secondary) {
-            const tertiaryEmotions = data.secondary[secondary];
-            const tertiaryAngle = (secEnd - secStart) / tertiaryEmotions.length;
+          const tertiaryEmotions = data.secondary[secondary];
+          const tertiaryAngle = (secEnd - secStart) / tertiaryEmotions.length;
 
+          // In revealed mode OR when this secondary is selected, show tertiary
+          const showTertiary = isRevealed || selectedSecondary === secondary;
+
+          if (showTertiary) {
             tertiaryEmotions.forEach((tertiary, k) => {
               const terStart = secStart + k * tertiaryAngle;
               const terEnd = secStart + (k + 1) * tertiaryAngle;
@@ -125,14 +145,52 @@ const Wheel = ({ onSelectFeeling, disabled = false }) => {
                 startAngle: terStart,
                 endAngle: terEnd,
               });
+
+              // Store segment info for avatar placement
+              tertiarySegmentMap[`${primary}-${secondary}-${tertiary}`] = {
+                center: getSegmentCenter(terStart, terEnd, 185, 240),
+                color: data.color,
+              };
             });
           }
         });
       }
     });
 
-    return result;
-  }, [selectedPrimary, selectedSecondary]);
+    // Calculate avatar positions for revealed mode
+    if (isRevealed) {
+      Object.entries(participants).forEach(([id, participant]) => {
+        if (participant.feeling) {
+          const key = `${participant.feeling.primary}-${participant.feeling.secondary}-${participant.feeling.tertiary}`;
+          const segmentInfo = tertiarySegmentMap[key];
+          if (segmentInfo) {
+            avatars.push({
+              id,
+              participant,
+              position: segmentInfo.center,
+              color: segmentInfo.color,
+            });
+          }
+        }
+      });
+    }
+
+    return { segments: result, avatarPositions: avatars };
+  }, [selectedPrimary, selectedSecondary, isRevealed, participants]);
+
+  // Group avatars by position to handle multiple users selecting same feeling
+  const groupedAvatars = useMemo(() => {
+    const groups = {};
+    avatarPositions.forEach((avatar) => {
+      const key = `${Math.round(avatar.position.x)}-${Math.round(avatar.position.y)}`;
+      if (!groups[key]) {
+        groups[key] = { ...avatar, avatars: [avatar] };
+      } else {
+        groups[key].avatars.push(avatar);
+      }
+    });
+    return Object.values(groups);
+  }, [avatarPositions]);
 
   return (
     <div className="relative">
@@ -145,9 +203,9 @@ const Wheel = ({ onSelectFeeling, disabled = false }) => {
             stroke="white"
             strokeWidth="2"
             className={`transition-all duration-200 ${
-              disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:opacity-80'
+              disabled || isRevealed ? 'cursor-default' : 'cursor-pointer hover:opacity-80'
             } ${hoveredSegment === `${segment.type}-${segment.emotion}` ? 'opacity-80' : ''}`}
-            onMouseEnter={() => setHoveredSegment(`${segment.type}-${segment.emotion}`)}
+            onMouseEnter={() => !isRevealed && setHoveredSegment(`${segment.type}-${segment.emotion}`)}
             onMouseLeave={() => setHoveredSegment(null)}
             onClick={() => {
               if (segment.type === 'primary') handlePrimaryClick(segment.emotion);
@@ -155,6 +213,65 @@ const Wheel = ({ onSelectFeeling, disabled = false }) => {
               else if (segment.type === 'tertiary') handleTertiaryClick(segment.emotion);
             }}
           />
+        ))}
+
+        {/* Render avatars when revealed */}
+        {isRevealed && groupedAvatars.map((group, idx) => (
+          <g key={idx}>
+            {group.avatars.map((avatar, avatarIdx) => {
+              const offsetX = avatarIdx * 6 - (group.avatars.length - 1) * 3;
+              const offsetY = avatarIdx * 6 - (group.avatars.length - 1) * 3;
+              const x = avatar.position.x + offsetX;
+              const y = avatar.position.y + offsetY;
+              const p = avatar.participant;
+
+              return (
+                <g key={avatar.id}>
+                  {/* Avatar circle background */}
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r="16"
+                    fill={p.avatarColor}
+                    stroke="white"
+                    strokeWidth="2"
+                    className="drop-shadow-md"
+                  />
+                  {/* Avatar content */}
+                  {p.avatarStyle === 'initials' ? (
+                    <text
+                      x={x}
+                      y={y}
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      fill="white"
+                      fontSize="10"
+                      fontWeight="bold"
+                    >
+                      {getInitials(p.name)}
+                    </text>
+                  ) : (
+                    <text
+                      x={x}
+                      y={y}
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      fontSize="14"
+                    >
+                      {p.avatarStyle === 'cat' ? '🐱' :
+                       p.avatarStyle === 'dog' ? '🐕' :
+                       p.avatarStyle === 'rabbit' ? '🐰' :
+                       p.avatarStyle === 'fish' ? '🐟' :
+                       p.avatarStyle === 'bird' ? '🐦' :
+                       p.avatarStyle === 'mouse' ? '🐭' :
+                       p.avatarStyle === 'bug' ? '🐛' :
+                       p.avatarStyle === 'octocat' ? '🐙' : '😊'}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+          </g>
         ))}
 
         {/* Center label */}
@@ -165,12 +282,12 @@ const Wheel = ({ onSelectFeeling, disabled = false }) => {
           dominantBaseline="middle"
           className="text-sm font-medium fill-slate-600 pointer-events-none"
         >
-          {hoveredSegment ? hoveredSegment.split('-')[1] : 'How are you feeling?'}
+          {isRevealed ? 'Team Feelings' : (hoveredSegment ? hoveredSegment.split('-')[1] : 'How are you feeling?')}
         </text>
       </svg>
 
-      {/* Breadcrumb */}
-      {(selectedPrimary || selectedSecondary) && (
+      {/* Breadcrumb - only show when not revealed */}
+      {!isRevealed && (selectedPrimary || selectedSecondary) && (
         <div className="text-center mt-4 text-sm text-slate-600">
           {selectedPrimary && <span className="font-medium">{selectedPrimary}</span>}
           {selectedSecondary && <span> → <span className="font-medium">{selectedSecondary}</span></span>}
