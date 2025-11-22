@@ -6,8 +6,8 @@ A beautiful, real-time project tracking tool using the Hill Chart methodology. T
 
 - **Interactive Hill Chart**: Visual representation of project progress
 - **Real-time Collaboration**: Updates sync instantly across all users via Firebase
-- **AI-Powered Suggestions**: Get actionable next steps powered by Google's Gemini AI
-- **Status Reports**: Generate comprehensive project status reports automatically
+- **Status Reports**: Coming soon - AI-powered status reports
+- **AI Suggestions**: Coming soon - Get actionable next steps
 - **Emoji Status Indicators**: Express how you're feeling about each task
 - **Responsive Design**: Beautiful UI that works on all devices
 
@@ -17,7 +17,6 @@ Before you begin, you'll need:
 
 1. **Node.js** (v16 or higher) - [Download here](https://nodejs.org/)
 2. **Firebase Account** - Free tier works great
-3. **Google AI Studio Account** - For Gemini API access
 
 ## Setup Instructions
 
@@ -58,14 +57,7 @@ npm install
 4. Enable **Anonymous** authentication
 5. Click "Save"
 
-### 4. Get Your Gemini API Key
-
-1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Sign in with your Google account
-3. Click "Create API Key"
-4. Copy your API key
-
-### 5. Configure Environment Variables
+### 4. Configure Environment Variables
 
 1. Open the `.env` file in the project root
 2. Replace the placeholder values with your actual credentials:
@@ -78,14 +70,11 @@ VITE_FIREBASE_PROJECT_ID=your_project_id_here
 VITE_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id_here
 VITE_FIREBASE_APP_ID=your_app_id_here
-
-# Gemini API Key
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 **Important**: Never commit your `.env` file to GitHub! It's already in `.gitignore`.
 
-### 6. Run Locally
+### 5. Run Locally
 
 ```bash
 npm run dev
@@ -191,9 +180,7 @@ hill-chart-app/
 1. **Add a Pin**: Click anywhere on the hill to place a pin
 2. **Choose Your Feeling**: Select an emoji that represents your mood
 3. **Describe Your Status**: Write what you're working on or what's blocking you
-4. **Get AI Suggestions**: Click "Suggest Next Steps" for AI-powered recommendations
-5. **Generate Reports**: Click "Generate Status Report" for a comprehensive project summary
-6. **Delete Pins**: Hover over a pin and click the delete button
+4. **Delete Pins**: Hover over a pin and click the delete button
 
 ## Security Considerations
 
@@ -233,10 +220,6 @@ service cloud.firestore {
 ### "Firebase: Error (auth/operation-not-allowed)"
 - Make sure Anonymous authentication is enabled in Firebase Console
 
-### "API Error: 403" from Gemini
-- Check that your Gemini API key is correct
-- Verify your API key has not exceeded its quota
-
 ### Styles not loading
 - Make sure Tailwind CSS is installed: `npm install -D tailwindcss postcss autoprefixer`
 - Check that `tailwind.config.js` exists
@@ -251,7 +234,6 @@ service cloud.firestore {
 - **Vite** - Build tool
 - **Firebase** - Real-time database and authentication
 - **Firestore** - NoSQL database
-- **Gemini AI** - AI-powered suggestions
 - **Tailwind CSS** - Utility-first CSS framework
 - **Lucide React** - Icon library
 
