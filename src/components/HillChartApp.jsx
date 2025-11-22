@@ -17,7 +17,7 @@ import {
 } from 'firebase/firestore';
 
 // --- Configuration ---
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
 const appId = 'hill-chart-app';
 
 // --- Analytics Helper ---
@@ -41,7 +41,19 @@ const trackFeatureInterest = async (featureName) => {
 
 // --- AI Helper Functions ---
 
+// --- AI Helper Functions (disabled - re-enable when backend proxy is ready) ---
 const callGemini = async (prompt) => {
+    // This function relied on the exposed API key which has been removed.
+    // Re-implement this using a backend proxy or cloud function when ready.
+    console.log("AI features are currently disabled.");
+    return "AI features are currently disabled.";
+};
+/* Original Implementation:
+const callGemini = async (prompt) => {
+    // This function relied on the exposed API key which has been removed.
+    // Re-implement this using a backend proxy or cloud function when ready.
+    
+    /*
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
     const payload = {
         contents: [{ parts: [{ text: prompt }] }]
@@ -78,7 +90,10 @@ const callGemini = async (prompt) => {
     };
 
     return makeRequest();
-};
+    */
+//return "AI features are currently disabled.";
+//};
+*/
 
 // --- Components ---
 
