@@ -8,6 +8,7 @@ import JoinRoomModal from './JoinRoomModal';
 import RetroColumn from './RetroColumn';
 import AddItemModal from './AddItemModal';
 import ParticipantsPanel from './ParticipantsPanel';
+import ExportHabitModal from './ExportHabitModal';
 
 const RetroBoardApp = ({ user, onBack }) => {
   const {
@@ -33,6 +34,7 @@ const RetroBoardApp = ({ user, onBack }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showParticipants, setShowParticipants] = useState(false);
   const [activeSection, setActiveSection] = useState(null);
+  const [exportItem, setExportItem] = useState(null);
   const [copied, setCopied] = useState(false);
 
   // Show join modal if not in a room
@@ -154,10 +156,7 @@ const RetroBoardApp = ({ user, onBack }) => {
                 isHost={isHost}
                 onAddClick={() => handleAddClick(section)}
                 onDeleteItem={removeItem}
-                onExportToHabit={(item) => {
-                  // TODO: Implement export to habit tracker
-                  console.log('Export to habit:', item);
-                }}
+                onExportToHabit={(item) => setExportItem(item)}
               />
             ))}
           </div>
@@ -194,6 +193,14 @@ const RetroBoardApp = ({ user, onBack }) => {
         onClose={() => setShowParticipants(false)}
         participants={participants}
         hostId={room?.hostId}
+      />
+
+      <ExportHabitModal
+        isOpen={!!exportItem}
+        onClose={() => setExportItem(null)}
+        item={exportItem}
+        roomCode={roomCode}
+        user={user}
       />
     </div>
   );
