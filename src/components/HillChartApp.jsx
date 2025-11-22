@@ -10,12 +10,34 @@ import {
     doc,
     query,
     where,
-    serverTimestamp
+    serverTimestamp,
+    updateDoc,
+    increment,
+    setDoc
 } from 'firebase/firestore';
 
 // --- Configuration ---
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 const appId = 'hill-chart-app';
+
+// --- Analytics Helper ---
+const trackFeatureInterest = async (featureName) => {
+    const analyticsRef = doc(db, 'artifacts', appId, 'public', 'data', 'analytics', 'feature-interest');
+    try {
+        await updateDoc(analyticsRef, {
+            [featureName]: increment(1),
+            lastUpdated: serverTimestamp()
+        });
+    } catch (error) {
+        // Document may not exist yet, create it
+        if (error.code === 'not-found') {
+            await setDoc(analyticsRef, {
+                [featureName]: 1,
+                lastUpdated: serverTimestamp()
+            });
+        }
+    }
+};
 
 // --- AI Helper Functions ---
 
