@@ -1,38 +1,21 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { MessageSquare, X, Plus, MapPin, Trash2, Info, Sparkles, FileText, Loader2, Camera, Download, Filter } from 'lucide-react';
+import { MessageSquare, X, Plus, MapPin, Trash2, Info, Sparkles, FileText, Loader2, Camera, Download, Filter, LogOut } from 'lucide-react';
 import html2canvas from 'html2canvas';
-import { initializeApp } from 'firebase/app';
+import { auth, db } from './firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import {
-  getAuth,
-  signInAnonymously,
-  onAuthStateChanged
-} from 'firebase/auth';
-import {
-  getFirestore,
   collection,
   addDoc,
   onSnapshot,
   deleteDoc,
   doc,
   query,
-  orderBy,
   serverTimestamp
 } from 'firebase/firestore';
+import Login from './components/Login';
 
 // --- Configuration ---
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
 const appId = 'hill-chart-app';
 
 // --- AI Helper Functions ---
@@ -53,9 +36,9 @@ const callGemini = async (prompt) => {
 
       if (!response.ok) {
         if (retryCount < 5) {
-            const delay = Math.pow(2, retryCount) * 1000;
-            await new Promise(resolve => setTimeout(resolve, delay));
-            return makeRequest(retryCount + 1);
+          const delay = Math.pow(2, retryCount) * 1000;
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return makeRequest(retryCount + 1);
         }
         throw new Error(`API Error: ${response.status}`);
       }
@@ -64,9 +47,9 @@ const callGemini = async (prompt) => {
       return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated.";
     } catch (error) {
       if (retryCount < 5) {
-         const delay = Math.pow(2, retryCount) * 1000;
-         await new Promise(resolve => setTimeout(resolve, delay));
-         return makeRequest(retryCount + 1);
+        const delay = Math.pow(2, retryCount) * 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return makeRequest(retryCount + 1);
       }
       console.error("Gemini API failed:", error);
       return "Sorry, I couldn't generate a response at this time.";
@@ -127,9 +110,9 @@ const HillChart = ({ pins, onAddPin, onDeletePin }) => {
   return (
     <div className="relative w-full aspect-[2/1] max-h-[500px] select-none group">
       <div className="absolute inset-0 bg-slate-50 rounded-xl border border-slate-200/60 shadow-inner overflow-hidden">
-         <div className="absolute inset-0 opacity-30"
-              style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
-         </div>
+        <div className="absolute inset-0 opacity-30"
+          style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
+        </div>
       </div>
 
       <div className="absolute bottom-4 left-4 text-slate-400 text-xs font-bold uppercase tracking-wider">Figuring it out</div>
@@ -298,9 +281,8 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
                 <button
                   key={e}
                   onClick={() => setEmoji(e)}
-                  className={`w-10 h-10 flex items-center justify-center text-xl rounded-lg transition-all ${
-                    emoji === e ? 'bg-white shadow-md scale-110 ring-2 ring-blue-100' : 'hover:bg-white/50 grayscale hover:grayscale-0'
-                  }`}
+                  className={`w-10 h-10 flex items-center justify-center text-xl rounded-lg transition-all ${emoji === e ? 'bg-white shadow-md scale-110 ring-2 ring-blue-100' : 'hover:bg-white/50 grayscale hover:grayscale-0'
+                    }`}
                 >
                   {e}
                 </button>
@@ -316,7 +298,7 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
                 disabled={isSuggesting || !text.trim()}
                 className="text-xs flex items-center gap-1 text-indigo-600 hover:text-indigo-700 disabled:opacity-50 font-medium transition-colors"
               >
-                {isSuggesting ? <Loader2 size={12} className="animate-spin"/> : <Sparkles size={12} />}
+                {isSuggesting ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
                 {isSuggesting ? 'Thinking...' : 'Suggest Next Steps'}
               </button>
             </div>
@@ -407,20 +389,20 @@ const ReportModal = ({ isOpen, onClose, pins }) => {
             </div>
           ) : (
             <div className="prose prose-slate prose-sm max-w-none">
-               <div className="whitespace-pre-wrap font-medium text-slate-700 leading-relaxed">
-                 {report}
-               </div>
+              <div className="whitespace-pre-wrap font-medium text-slate-700 leading-relaxed">
+                {report}
+              </div>
             </div>
           )}
         </div>
 
         <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
-           <button
+          <button
             onClick={onClose}
             className="px-4 py-2 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium rounded-lg transition-colors"
-           >
-             Close Report
-           </button>
+          >
+            Close Report
+          </button>
         </div>
       </div>
     </div>
@@ -431,25 +413,25 @@ const ReportModal = ({ isOpen, onClose, pins }) => {
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
   const [pins, setPins] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [pendingPinX, setPendingPinX] = useState(null);
   const [dateFilter, setDateFilter] = useState('all'); // 'all', 'today', 'week', 'sprint'
   const [isExporting, setIsExporting] = useState(false);
-  
+
   // Storybook Mode State
   const [isStoryMode, setIsStoryMode] = useState(false);
   const [storyDateIndex, setStoryDateIndex] = useState(0);
-  
+
   const chartRef = useRef(null);
 
   useEffect(() => {
-    const initAuth = async () => {
-      await signInAnonymously(auth);
-    };
-    initAuth();
-    const unsubscribe = onAuthStateChanged(auth, setUser);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoadingAuth(false);
+    });
     return () => unsubscribe();
   }, []);
 
@@ -507,6 +489,14 @@ export default function App() {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   // Filter pins by date range
   const filterPinsByDate = (pins) => {
     const now = new Date();
@@ -516,7 +506,7 @@ export default function App() {
       if (!pin.createdAt) return true; // Show pins without date
       const pinDate = new Date(pin.createdAt.seconds * 1000);
 
-      switch(dateFilter) {
+      switch (dateFilter) {
         case 'today':
           return pinDate >= today;
         case 'week':
@@ -588,6 +578,18 @@ export default function App() {
     }
   };
 
+  if (loadingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-100">
+        <Loader2 size={48} className="text-blue-600 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Login />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 font-sans p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-8">
@@ -597,7 +599,7 @@ export default function App() {
             <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
               <div className="bg-blue-600 text-white p-2 rounded-lg shadow-lg">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M2 20 L12 4 L22 20" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M2 20 L12 4 L22 20" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
               Project Hill Chart
@@ -606,27 +608,34 @@ export default function App() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-             <button
-               onClick={handleExportScreenshot}
-               disabled={isExporting}
-               className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white text-sm font-bold rounded-full shadow-md hover:shadow-lg transition-all"
-             >
-               {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-               {isExporting ? 'Exporting...' : 'Export Screenshot'}
-             </button>
-             <button
-               onClick={() => setIsReportOpen(true)}
-               className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-full shadow-md hover:shadow-lg transition-all"
-             >
-               <Sparkles size={16} />
-               Generate Report
-             </button>
+            <button
+              onClick={handleExportScreenshot}
+              disabled={isExporting}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white text-sm font-bold rounded-full shadow-md hover:shadow-lg transition-all"
+            >
+              {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+              {isExporting ? 'Exporting...' : 'Export Screenshot'}
+            </button>
+            <button
+              onClick={() => setIsReportOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-full shadow-md hover:shadow-lg transition-all"
+            >
+              <Sparkles size={16} />
+              Generate Report
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-600 text-sm font-bold rounded-full shadow-sm border border-slate-200 transition-all"
+              title="Sign Out"
+            >
+              <LogOut size={16} />
+            </button>
           </div>
         </header>
 
         {/* Controls: Date Filter OR Storybook Mode */}
         <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
-          
+
           <div className="flex items-center gap-4">
             {/* Storybook Toggle */}
             <button
@@ -634,11 +643,10 @@ export default function App() {
                 setIsStoryMode(!isStoryMode);
                 setStoryDateIndex(0); // Reset to newest date
               }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all ${
-                isStoryMode 
-                  ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400' 
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all ${isStoryMode
+                  ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
+                }`}
             >
               <span className="text-xl">📖</span>
               {isStoryMode ? 'Exit Storybook' : 'Storybook Mode'}
@@ -686,11 +694,10 @@ export default function App() {
                   <button
                     key={filter.value}
                     onClick={() => setDateFilter(filter.value)}
-                    className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${
-                      dateFilter === filter.value
+                    className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${dateFilter === filter.value
                         ? 'bg-blue-600 text-white shadow-md'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
+                      }`}
                   >
                     {filter.label}
                   </button>
@@ -700,7 +707,7 @@ export default function App() {
           )}
 
           <div className="text-sm text-slate-500 font-medium">
-            {isStoryMode 
+            {isStoryMode
               ? `Page ${uniqueDates.length - storyDateIndex} of ${uniqueDates.length}`
               : `${filteredPins.length} updates`
             }
@@ -725,98 +732,97 @@ export default function App() {
               </h2>
               <div className="space-y-3">
                 {filteredPins.filter(p => p.x < 50).length === 0 && (
-                <div className="text-slate-400 italic text-sm bg-white p-4 rounded-xl border border-slate-200 border-dashed text-center">No updates in this phase</div>
-              )}
-              {filteredPins.filter(p => p.x < 50).map(pin => (
-                <div key={pin.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3 transition-hover hover:shadow-md relative group">
-                  <div className="text-2xl bg-slate-50 p-2 rounded-lg">{pin.emoji}</div>
-                  <div className="flex-1">
-                    <p className="text-slate-700 text-sm leading-relaxed mb-2">{pin.text}</p>
-                    {pin.projectName && (
-                      <div className="inline-block bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-indigo-100 mb-2">
-                        {pin.projectName}
-                      </div>
-                    )}
-                    {pin.name && (
-                      <p className="text-xs font-semibold text-blue-600 mb-1">👤 {pin.name}</p>
-                    )}
-                    <div className="flex items-center gap-3 text-xs text-slate-400">
-                      <span>Position: {Math.round(pin.x)}%</span>
-                      {pin.createdAt && (
-                        <span>📅 {new Date(pin.createdAt.seconds * 1000).toLocaleDateString()} {new Date(pin.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  <div className="text-slate-400 italic text-sm bg-white p-4 rounded-xl border border-slate-200 border-dashed text-center">No updates in this phase</div>
+                )}
+                {filteredPins.filter(p => p.x < 50).map(pin => (
+                  <div key={pin.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3 transition-hover hover:shadow-md relative group">
+                    <div className="text-2xl bg-slate-50 p-2 rounded-lg">{pin.emoji}</div>
+                    <div className="flex-1">
+                      <p className="text-slate-700 text-sm leading-relaxed mb-2">{pin.text}</p>
+                      {pin.projectName && (
+                        <div className="inline-block bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-indigo-100 mb-2">
+                          {pin.projectName}
+                        </div>
                       )}
+                      {pin.name && (
+                        <p className="text-xs font-semibold text-blue-600 mb-1">👤 {pin.name}</p>
+                      )}
+                      <div className="flex items-center gap-3 text-xs text-slate-400">
+                        <span>Position: {Math.round(pin.x)}%</span>
+                        {pin.createdAt && (
+                          <span>📅 {new Date(pin.createdAt.seconds * 1000).toLocaleDateString()} {new Date(pin.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        )}
+                      </div>
                     </div>
+                    <button
+                      onClick={() => handleDeletePin(pin.id)}
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-red-100 hover:bg-red-200 p-1.5 rounded-full text-red-600 transition-all"
+                      title="Delete Update"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => handleDeletePin(pin.id)}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-red-100 hover:bg-red-200 p-1.5 rounded-full text-red-600 transition-all"
-                    title="Delete Update"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div>
-            <h2 className="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2">
-              <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
-              Downhill (Executing)
-            </h2>
-            <div className="space-y-3">
-              {filteredPins.filter(p => p.x >= 50).length === 0 && (
-                <div className="text-slate-400 italic text-sm bg-white p-4 rounded-xl border border-slate-200 border-dashed text-center">No updates in this phase</div>
-              )}
-              {filteredPins.filter(p => p.x >= 50).map(pin => (
-                <div key={pin.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3 transition-hover hover:shadow-md relative group">
-                  <div className="text-2xl bg-slate-50 p-2 rounded-lg">{pin.emoji}</div>
-                  <div className="flex-1">
-                    <p className="text-slate-700 text-sm leading-relaxed mb-2">{pin.text}</p>
-                    {pin.projectName && (
-                      <div className="inline-block bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-indigo-100 mb-2">
-                        {pin.projectName}
-                      </div>
-                    )}
-                    {pin.name && (
-                      <p className="text-xs font-semibold text-blue-600 mb-1">👤 {pin.name}</p>
-                    )}
-                    <div className="flex items-center gap-3 text-xs text-slate-400">
-                      <span>Position: {Math.round(pin.x)}%</span>
-                      {pin.createdAt && (
-                        <span>📅 {new Date(pin.createdAt.seconds * 1000).toLocaleDateString()} {new Date(pin.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            <div>
+              <h2 className="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                Downhill (Executing)
+              </h2>
+              <div className="space-y-3">
+                {filteredPins.filter(p => p.x >= 50).length === 0 && (
+                  <div className="text-slate-400 italic text-sm bg-white p-4 rounded-xl border border-slate-200 border-dashed text-center">No updates in this phase</div>
+                )}
+                {filteredPins.filter(p => p.x >= 50).map(pin => (
+                  <div key={pin.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3 transition-hover hover:shadow-md relative group">
+                    <div className="text-2xl bg-slate-50 p-2 rounded-lg">{pin.emoji}</div>
+                    <div className="flex-1">
+                      <p className="text-slate-700 text-sm leading-relaxed mb-2">{pin.text}</p>
+                      {pin.projectName && (
+                        <div className="inline-block bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-indigo-100 mb-2">
+                          {pin.projectName}
+                        </div>
                       )}
+                      {pin.name && (
+                        <p className="text-xs font-semibold text-blue-600 mb-1">👤 {pin.name}</p>
+                      )}
+                      <div className="flex items-center gap-3 text-xs text-slate-400">
+                        <span>Position: {Math.round(pin.x)}%</span>
+                        {pin.createdAt && (
+                          <span>📅 {new Date(pin.createdAt.seconds * 1000).toLocaleDateString()} {new Date(pin.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        )}
+                      </div>
                     </div>
+                    <button
+                      onClick={() => handleDeletePin(pin.id)}
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-red-100 hover:bg-red-200 p-1.5 rounded-full text-red-600 transition-all"
+                      title="Delete Update"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => handleDeletePin(pin.id)}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-red-100 hover:bg-red-200 p-1.5 rounded-full text-red-600 transition-all"
-                    title="Delete Update"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
           </section>
         </div>
-        {/* End of screenshot ref */}
+
+        <PinModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleSavePin}
+          initialX={pendingPinX}
+        />
+
+        <ReportModal
+          isOpen={isReportOpen}
+          onClose={() => setIsReportOpen(false)}
+          pins={pins}
+        />
 
       </div>
-
-      <PinModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleSavePin}
-        initialX={pendingPinX}
-      />
-
-      <ReportModal
-        isOpen={isReportOpen}
-        onClose={() => setIsReportOpen(false)}
-        pins={pins}
-      />
     </div>
   );
 }
