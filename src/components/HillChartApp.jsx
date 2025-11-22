@@ -90,9 +90,7 @@ const callGemini = async (prompt) => {
     };
 
     return makeRequest();
-    */
-//return "AI features are currently disabled.";
-//};
+};
 */
 
 // --- Components ---
@@ -357,6 +355,8 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
     );
 };
 
+// --- ReportModal (disabled - re-enable when AI features are ready) ---
+/*
 const ReportModal = ({ isOpen, onClose, pins }) => {
     const [report, setReport] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -437,6 +437,7 @@ const ReportModal = ({ isOpen, onClose, pins }) => {
         </div>
     );
 };
+*/
 
 const ComingSoonModal = ({ isOpen, onClose, featureName, featureTitle, featureDescription }) => {
     useEffect(() => {
@@ -467,7 +468,6 @@ const ComingSoonModal = ({ isOpen, onClose, featureName, featureTitle, featureDe
 const HillChartApp = ({ user, onBack }) => {
     const [pins, setPins] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isReportOpen, setIsReportOpen] = useState(false);
     const [isReportComingSoonOpen, setIsReportComingSoonOpen] = useState(false);
     const [pendingPinX, setPendingPinX] = useState(null);
     const [dateFilter, setDateFilter] = useState('all'); // 'all', 'today', 'week', 'sprint'
@@ -843,12 +843,6 @@ const HillChartApp = ({ user, onBack }) => {
                     onClose={() => setIsModalOpen(false)}
                     onSubmit={handleSavePin}
                     initialX={pendingPinX}
-                />
-
-                <ReportModal
-                    isOpen={isReportOpen}
-                    onClose={() => setIsReportOpen(false)}
-                    pins={pins}
                 />
 
                 <ComingSoonModal
