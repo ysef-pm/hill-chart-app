@@ -206,15 +206,17 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /artifacts/{appId}/public/data/pins/{pinId} {
-      // Allow authenticated users to read
-      allow read: if request.auth != null;
+      // Users can only read their own pins
+      allow read: if request.auth != null &&
+                    resource.data.uid == request.auth.uid;
 
-      // Allow authenticated users to create
-      allow create: if request.auth != null;
+      // Users can create pins (uid must match their auth)
+      allow create: if request.auth != null &&
+                      request.resource.data.uid == request.auth.uid;
 
-      // Allow users to delete their own pins
-      allow delete: if request.auth != null &&
-                      resource.data.uid == request.auth.uid;
+      // Users can only update/delete their own pins
+      allow update, delete: if request.auth != null &&
+                              resource.data.uid == request.auth.uid;
     }
   }
 }

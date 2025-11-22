@@ -9,6 +9,7 @@ import {
     deleteDoc,
     doc,
     query,
+    where,
     serverTimestamp
 } from 'firebase/firestore';
 
@@ -424,7 +425,10 @@ const HillChartApp = ({ user, onBack }) => {
     useEffect(() => {
         if (!user) return;
 
-        const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'pins'));
+        const q = query(
+            collection(db, 'artifacts', appId, 'public', 'data', 'pins'),
+            where('uid', '==', user.uid)
+        );
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const newPins = snapshot.docs.map(doc => ({
