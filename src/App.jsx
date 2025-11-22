@@ -5,6 +5,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import Login from './components/Login';
 import Launcher from './components/Launcher';
 import HillChartApp from './components/HillChartApp';
+import { FeelingsWheelApp } from './components/FeelingsWheel';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -37,6 +38,10 @@ export default function App() {
 
   if (currentApp === 'hill-chart') {
     return <HillChartApp user={user} onBack={() => setCurrentApp(null)} />;
+  }
+
+  if (currentApp === 'feelings-wheel') {
+    return <FeelingsWheelApp user={user} onBack={() => setCurrentApp(null)} />;
   }
 
   return <Launcher user={user} onSelectApp={setCurrentApp} />;
