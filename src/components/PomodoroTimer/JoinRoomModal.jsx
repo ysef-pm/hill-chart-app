@@ -1,7 +1,7 @@
 // src/components/PomodoroTimer/JoinRoomModal.jsx
 
 import React, { useState } from 'react';
-import { X, Users, Plus, Timer } from 'lucide-react';
+import { X, Users, Plus } from 'lucide-react';
 import { AVATAR_COLORS, getInitials } from './constants';
 
 const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loading, error }) => {
