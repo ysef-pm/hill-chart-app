@@ -195,13 +195,14 @@ export const usePomodoroRoom = (user) => {
 
     // Update garden stats
     if (newCompleted) {
-      const gardenRef = ref(rtdb, `pomodoroRooms/${roomCode}/garden`);
-      await update(gardenRef, {
-        completedTasks: (garden.completedTasks || 0) + 1,
-        lastHarvest: serverTimestamp(),
-      });
+      const completedTasksRef = ref(rtdb, `pomodoroRooms/${roomCode}/garden/completedTasks`);
+      const currentCount = await get(completedTasksRef);
+      await set(completedTasksRef, (currentCount.val() || 0) + 1);
+
+      const lastHarvestRef = ref(rtdb, `pomodoroRooms/${roomCode}/garden/lastHarvest`);
+      await set(lastHarvestRef, serverTimestamp());
     }
-  }, [roomCode, tasks, garden]);
+  }, [roomCode, tasks]);
 
   const deleteTask = useCallback(async (taskId) => {
     if (!roomCode || !taskId) return;
