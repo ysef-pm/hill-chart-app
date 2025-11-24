@@ -211,6 +211,124 @@ export const usePomodoroRoom = (user) => {
     await remove(taskRef);
   }, [roomCode]);
 
+  // Timer management
+  const startTimer = useCallback(async (type = 'work') => {
+    if (!roomCode || !user?.uid) return;
+
+    const duration = type === 'work' ? DEFAULT_WORK_DURATION : DEFAULT_BREAK_DURATION;
+    const endTime = Date.now() + duration;
+
+    if (room?.timerMode === TIMER_MODES.TEAM && isHost) {
+      const timerRef = ref(rtdb, `pomodoroRooms/${roomCode}/teamTimer`);
+      await set(timerRef, {
+        endTime,
+        isPaused: false,
+        pausedRemaining: null,
+        type,
+        duration,
+      });
+    } else {
+      const personalTimerRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/personalTimer`);
+      await set(personalTimerRef, {
+        endTime,
+        isPaused: false,
+        pausedRemaining: null,
+        type,
+        duration,
+      });
+
+      const statusRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/status`);
+      await set(statusRef, type === 'work' ? USER_STATUS.FOCUSING : USER_STATUS.BREAK);
+    }
+  }, [roomCode, user?.uid, room?.timerMode, isHost]);
+
+  const pauseTimer = useCallback(async () => {
+    if (!roomCode || !user?.uid) return;
+
+    const timer = room?.timerMode === TIMER_MODES.TEAM ? room?.teamTimer : currentUser?.personalTimer;
+    if (!timer || timer.isPaused) return;
+
+    const remaining = timer.endTime - Date.now();
+    const timerRef = room?.timerMode === TIMER_MODES.TEAM && isHost
+      ? ref(rtdb, `pomodoroRooms/${roomCode}/teamTimer`)
+      : ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/personalTimer`);
+
+    await update(timerRef, {
+      isPaused: true,
+      pausedRemaining: remaining,
+      endTime: null,
+    });
+  }, [roomCode, user?.uid, room, currentUser, isHost]);
+
+  const resumeTimer = useCallback(async () => {
+    if (!roomCode || !user?.uid) return;
+
+    const timer = room?.timerMode === TIMER_MODES.TEAM ? room?.teamTimer : currentUser?.personalTimer;
+    if (!timer || !timer.isPaused) return;
+
+    const newEndTime = Date.now() + timer.pausedRemaining;
+    const timerRef = room?.timerMode === TIMER_MODES.TEAM && isHost
+      ? ref(rtdb, `pomodoroRooms/${roomCode}/teamTimer`)
+      : ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/personalTimer`);
+
+    await update(timerRef, {
+      isPaused: false,
+      pausedRemaining: null,
+      endTime: newEndTime,
+    });
+  }, [roomCode, user?.uid, room, currentUser, isHost]);
+
+  const resetTimer = useCallback(async () => {
+    if (!roomCode || !user?.uid) return;
+
+    if (room?.timerMode === TIMER_MODES.TEAM && isHost) {
+      const timerRef = ref(rtdb, `pomodoroRooms/${roomCode}/teamTimer`);
+      await set(timerRef, null);
+    } else {
+      const personalTimerRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/personalTimer`);
+      await set(personalTimerRef, null);
+
+      const statusRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/status`);
+      await set(statusRef, USER_STATUS.IDLE);
+    }
+  }, [roomCode, user?.uid, room?.timerMode, isHost]);
+
+  const completePomodoro = useCallback(async () => {
+    if (!roomCode || !user?.uid) return;
+
+    // Increment room pomodoro count
+    const gardenRef = ref(rtdb, `pomodoroRooms/${roomCode}/garden/totalPomodoros`);
+    const gardenSnap = await get(gardenRef);
+    await set(gardenRef, (gardenSnap.val() || 0) + 1);
+
+    // Increment user's daily count
+    const statsRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/stats/pomodorosToday`);
+    const statsSnap = await get(statsRef);
+    await set(statsRef, (statsSnap.val() || 0) + 1);
+
+    // Set status to idle
+    const statusRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/status`);
+    await set(statusRef, USER_STATUS.IDLE);
+  }, [roomCode, user?.uid]);
+
+  const setTimerMode = useCallback(async (mode) => {
+    if (!roomCode || !isHost) return;
+
+    const modeRef = ref(rtdb, `pomodoroRooms/${roomCode}/timerMode`);
+    await set(modeRef, mode);
+
+    // Reset team timer when switching modes
+    const timerRef = ref(rtdb, `pomodoroRooms/${roomCode}/teamTimer`);
+    await set(timerRef, null);
+  }, [roomCode, isHost]);
+
+  const updateSettings = useCallback(async (newSettings) => {
+    if (!roomCode || !user?.uid) return;
+
+    const settingsRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/settings`);
+    await update(settingsRef, newSettings);
+  }, [roomCode, user?.uid]);
+
   const currentUser = user?.uid ? participants[user.uid] : null;
 
   return {
@@ -229,5 +347,12 @@ export const usePomodoroRoom = (user) => {
     addTask,
     toggleTask,
     deleteTask,
+    startTimer,
+    pauseTimer,
+    resumeTimer,
+    resetTimer,
+    completePomodoro,
+    setTimerMode,
+    updateSettings,
   };
 };
