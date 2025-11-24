@@ -1,7 +1,7 @@
 // src/components/PomodoroTimer/hooks/usePomodoroRoom.js
 
 import { useState, useEffect, useCallback } from 'react';
-import { ref, set, get, push, update, onValue, onDisconnect, serverTimestamp, remove } from 'firebase/database';
+import { ref, set, get, push, update, onValue, onDisconnect, serverTimestamp, remove, runTransaction } from 'firebase/database';
 import { rtdb } from '../../../firebase';
 import { generateRoomCode, getRandomColor, DEFAULT_WORK_DURATION, DEFAULT_BREAK_DURATION, TIMER_MODES, USER_STATUS } from '../constants';
 
@@ -185,22 +185,28 @@ export const usePomodoroRoom = (user) => {
     const task = tasks[taskId];
     if (!task) return;
 
-    const taskRef = ref(rtdb, `pomodoroRooms/${roomCode}/tasks/${taskId}`);
-    const newCompleted = !task.completed;
+    try {
+      const taskRef = ref(rtdb, `pomodoroRooms/${roomCode}/tasks/${taskId}`);
+      const newCompleted = !task.completed;
 
-    await update(taskRef, {
-      completed: newCompleted,
-      completedAt: newCompleted ? serverTimestamp() : null,
-    });
+      await update(taskRef, {
+        completed: newCompleted,
+        completedAt: newCompleted ? serverTimestamp() : null,
+      });
 
-    // Update garden stats
-    if (newCompleted) {
-      const completedTasksRef = ref(rtdb, `pomodoroRooms/${roomCode}/garden/completedTasks`);
-      const currentCount = await get(completedTasksRef);
-      await set(completedTasksRef, (currentCount.val() || 0) + 1);
+      // Update garden stats using transaction to prevent race conditions
+      if (newCompleted) {
+        const completedTasksRef = ref(rtdb, `pomodoroRooms/${roomCode}/garden/completedTasks`);
+        await runTransaction(completedTasksRef, (currentCount) => {
+          return (currentCount || 0) + 1;
+        });
 
-      const lastHarvestRef = ref(rtdb, `pomodoroRooms/${roomCode}/garden/lastHarvest`);
-      await set(lastHarvestRef, serverTimestamp());
+        const lastHarvestRef = ref(rtdb, `pomodoroRooms/${roomCode}/garden/lastHarvest`);
+        await set(lastHarvestRef, serverTimestamp());
+      }
+    } catch (err) {
+      console.error('Error toggling task:', err);
+      setError(err.message);
     }
   }, [roomCode, tasks]);
 
@@ -212,103 +218,130 @@ export const usePomodoroRoom = (user) => {
   }, [roomCode]);
 
   // Timer management
-  const startTimer = useCallback(async (type = 'work') => {
+  const startTimer = useCallback(async (type = 'work', customDuration = null) => {
     if (!roomCode || !user?.uid) return;
 
-    const duration = type === 'work' ? DEFAULT_WORK_DURATION : DEFAULT_BREAK_DURATION;
-    const endTime = Date.now() + duration;
+    try {
+      const duration = customDuration || (type === 'work' ? DEFAULT_WORK_DURATION : DEFAULT_BREAK_DURATION);
+      const endTime = Date.now() + duration;
 
-    if (room?.timerMode === TIMER_MODES.TEAM && isHost) {
-      const timerRef = ref(rtdb, `pomodoroRooms/${roomCode}/teamTimer`);
-      await set(timerRef, {
-        endTime,
-        isPaused: false,
-        pausedRemaining: null,
-        type,
-        duration,
-      });
-    } else {
-      const personalTimerRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/personalTimer`);
-      await set(personalTimerRef, {
-        endTime,
-        isPaused: false,
-        pausedRemaining: null,
-        type,
-        duration,
-      });
+      if (room?.timerMode === TIMER_MODES.TEAM && isHost) {
+        const timerRef = ref(rtdb, `pomodoroRooms/${roomCode}/teamTimer`);
+        await set(timerRef, {
+          endTime,
+          isPaused: false,
+          pausedRemaining: null,
+          type,
+          duration,
+        });
+      } else {
+        const personalTimerRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/personalTimer`);
+        await set(personalTimerRef, {
+          endTime,
+          isPaused: false,
+          pausedRemaining: null,
+          type,
+          duration,
+        });
 
-      const statusRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/status`);
-      await set(statusRef, type === 'work' ? USER_STATUS.FOCUSING : USER_STATUS.BREAK);
+        const statusRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/status`);
+        await set(statusRef, type === 'work' ? USER_STATUS.FOCUSING : USER_STATUS.BREAK);
+      }
+    } catch (err) {
+      console.error('Error starting timer:', err);
+      setError(err.message);
     }
   }, [roomCode, user?.uid, room?.timerMode, isHost]);
 
   const pauseTimer = useCallback(async () => {
     if (!roomCode || !user?.uid) return;
 
-    const timer = room?.timerMode === TIMER_MODES.TEAM ? room?.teamTimer : currentUser?.personalTimer;
-    if (!timer || timer.isPaused) return;
+    try {
+      const timer = room?.timerMode === TIMER_MODES.TEAM ? room?.teamTimer : currentUser?.personalTimer;
+      if (!timer || timer.isPaused) return;
 
-    const remaining = timer.endTime - Date.now();
-    const timerRef = room?.timerMode === TIMER_MODES.TEAM && isHost
-      ? ref(rtdb, `pomodoroRooms/${roomCode}/teamTimer`)
-      : ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/personalTimer`);
+      const remaining = timer.endTime - Date.now();
+      const timerRef = room?.timerMode === TIMER_MODES.TEAM && isHost
+        ? ref(rtdb, `pomodoroRooms/${roomCode}/teamTimer`)
+        : ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/personalTimer`);
 
-    await update(timerRef, {
-      isPaused: true,
-      pausedRemaining: remaining,
-      endTime: null,
-    });
+      await update(timerRef, {
+        isPaused: true,
+        pausedRemaining: remaining,
+        endTime: null,
+      });
+    } catch (err) {
+      console.error('Error pausing timer:', err);
+      setError(err.message);
+    }
   }, [roomCode, user?.uid, room, currentUser, isHost]);
 
   const resumeTimer = useCallback(async () => {
     if (!roomCode || !user?.uid) return;
 
-    const timer = room?.timerMode === TIMER_MODES.TEAM ? room?.teamTimer : currentUser?.personalTimer;
-    if (!timer || !timer.isPaused) return;
+    try {
+      const timer = room?.timerMode === TIMER_MODES.TEAM ? room?.teamTimer : currentUser?.personalTimer;
+      if (!timer || !timer.isPaused) return;
 
-    const newEndTime = Date.now() + timer.pausedRemaining;
-    const timerRef = room?.timerMode === TIMER_MODES.TEAM && isHost
-      ? ref(rtdb, `pomodoroRooms/${roomCode}/teamTimer`)
-      : ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/personalTimer`);
+      const newEndTime = Date.now() + timer.pausedRemaining;
+      const timerRef = room?.timerMode === TIMER_MODES.TEAM && isHost
+        ? ref(rtdb, `pomodoroRooms/${roomCode}/teamTimer`)
+        : ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/personalTimer`);
 
-    await update(timerRef, {
-      isPaused: false,
-      pausedRemaining: null,
-      endTime: newEndTime,
-    });
+      await update(timerRef, {
+        isPaused: false,
+        pausedRemaining: null,
+        endTime: newEndTime,
+      });
+    } catch (err) {
+      console.error('Error resuming timer:', err);
+      setError(err.message);
+    }
   }, [roomCode, user?.uid, room, currentUser, isHost]);
 
   const resetTimer = useCallback(async () => {
     if (!roomCode || !user?.uid) return;
 
-    if (room?.timerMode === TIMER_MODES.TEAM && isHost) {
-      const timerRef = ref(rtdb, `pomodoroRooms/${roomCode}/teamTimer`);
-      await set(timerRef, null);
-    } else {
-      const personalTimerRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/personalTimer`);
-      await set(personalTimerRef, null);
+    try {
+      if (room?.timerMode === TIMER_MODES.TEAM && isHost) {
+        const timerRef = ref(rtdb, `pomodoroRooms/${roomCode}/teamTimer`);
+        await set(timerRef, null);
+      } else {
+        const personalTimerRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/personalTimer`);
+        await set(personalTimerRef, null);
 
-      const statusRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/status`);
-      await set(statusRef, USER_STATUS.IDLE);
+        const statusRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/status`);
+        await set(statusRef, USER_STATUS.IDLE);
+      }
+    } catch (err) {
+      console.error('Error resetting timer:', err);
+      setError(err.message);
     }
   }, [roomCode, user?.uid, room?.timerMode, isHost]);
 
   const completePomodoro = useCallback(async () => {
     if (!roomCode || !user?.uid) return;
 
-    // Increment room pomodoro count
-    const gardenRef = ref(rtdb, `pomodoroRooms/${roomCode}/garden/totalPomodoros`);
-    const gardenSnap = await get(gardenRef);
-    await set(gardenRef, (gardenSnap.val() || 0) + 1);
+    try {
+      // Increment room pomodoro count using transaction to prevent race conditions
+      const gardenRef = ref(rtdb, `pomodoroRooms/${roomCode}/garden/totalPomodoros`);
+      await runTransaction(gardenRef, (currentCount) => {
+        return (currentCount || 0) + 1;
+      });
 
-    // Increment user's daily count
-    const statsRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/stats/pomodorosToday`);
-    const statsSnap = await get(statsRef);
-    await set(statsRef, (statsSnap.val() || 0) + 1);
+      // Increment user's daily count using transaction to prevent race conditions
+      const statsRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/stats/pomodorosToday`);
+      await runTransaction(statsRef, (currentCount) => {
+        return (currentCount || 0) + 1;
+      });
 
-    // Set status to idle
-    const statusRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/status`);
-    await set(statusRef, USER_STATUS.IDLE);
+      // Set status to idle
+      const statusRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/status`);
+      await set(statusRef, USER_STATUS.IDLE);
+    } catch (err) {
+      console.error('Error completing pomodoro:', err);
+      setError(err.message);
+    }
   }, [roomCode, user?.uid]);
 
   const setTimerMode = useCallback(async (mode) => {
