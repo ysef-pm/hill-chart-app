@@ -1,6 +1,6 @@
 // src/components/PomodoroTimer/PomodoroApp.jsx
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Copy, Check } from 'lucide-react';
 import { usePomodoroRoom } from './hooks/usePomodoroRoom';
 import { DEFAULT_WORK_DURATION, DEFAULT_BREAK_DURATION, TIMER_MODES } from './constants';
@@ -34,6 +34,7 @@ const playNotificationSound = () => {
     }, 200);
   } catch (e) {
     console.warn('Could not play notification sound:', e);
+    if (audioContext) audioContext.close();
   }
 };
 
@@ -67,7 +68,6 @@ const PomodoroApp = ({ user, onBack }) => {
   const [copied, setCopied] = useState(false);
   const [workDuration, setWorkDuration] = useState(DEFAULT_WORK_DURATION);
   const [breakDuration, setBreakDuration] = useState(DEFAULT_BREAK_DURATION);
-  const prevTimerRef = useRef(null);
 
   // Get current timer based on mode
   const currentTimer = room?.timerMode === TIMER_MODES.TEAM
@@ -81,54 +81,39 @@ const PomodoroApp = ({ user, onBack }) => {
     }
   }, [roomCode]);
 
-  // Handle timer completion
-  useEffect(() => {
-    if (!currentTimer) {
-      prevTimerRef.current = null;
-      return;
-    }
-
-    const wasRunning = prevTimerRef.current?.endTime && !prevTimerRef.current?.isPaused;
-    const isNowComplete = !currentTimer.endTime && !currentTimer.isPaused && currentTimer.type;
-
-    if (wasRunning && isNowComplete) {
-      // Timer just completed
-      if (currentUser?.settings?.soundEnabled) {
-        playNotificationSound();
-      }
-
-      if (currentUser?.settings?.notificationsEnabled &&
-          typeof Notification !== 'undefined' &&
-          Notification.permission === 'granted') {
-        new Notification('Pomodoro Complete!', {
-          body: currentTimer.type === 'work' ? 'Time for a break!' : 'Ready to focus?',
-          icon: '/tomato-icon.png',
-        });
-      }
-
-      if (currentTimer.type === 'work') {
-        completePomodoro();
-      }
-    }
-
-    prevTimerRef.current = currentTimer;
-  }, [currentTimer, currentUser?.settings, completePomodoro]);
-
-  // Check if timer just hit zero
+  // Handle timer completion - check every 100ms if timer reached zero
   useEffect(() => {
     if (!currentTimer?.endTime || currentTimer?.isPaused) return;
 
     const checkCompletion = () => {
       const remaining = currentTimer.endTime - Date.now();
       if (remaining <= 0) {
-        // Timer completed - reset it
+        // Timer completed - trigger notifications
+        if (currentUser?.settings?.soundEnabled) {
+          playNotificationSound();
+        }
+
+        if (currentUser?.settings?.notificationsEnabled &&
+            typeof Notification !== 'undefined' &&
+            Notification.permission === 'granted') {
+          new Notification('Pomodoro Complete!', {
+            body: currentTimer.type === 'work' ? 'Time for a break!' : 'Ready to focus?',
+            icon: '/tomato-icon.png',
+          });
+        }
+
+        if (currentTimer.type === 'work') {
+          completePomodoro();
+        }
+
+        // Reset timer
         resetTimer();
       }
     };
 
     const interval = setInterval(checkCompletion, 100);
     return () => clearInterval(interval);
-  }, [currentTimer?.endTime, currentTimer?.isPaused, resetTimer]);
+  }, [currentTimer?.endTime, currentTimer?.isPaused, currentTimer?.type, currentUser?.settings, completePomodoro, resetTimer]);
 
   const handleBack = () => {
     if (roomCode) {
@@ -145,8 +130,13 @@ const PomodoroApp = ({ user, onBack }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleStartTimer = (type) => {
+    const duration = type === 'work' ? workDuration : breakDuration;
+    startTimer(type, duration);
+  };
+
   const handleStartBreak = () => {
-    startTimer('break');
+    handleStartTimer('break');
   };
 
   const isTimerRunning = currentTimer && !currentTimer.isPaused && currentTimer.endTime;
@@ -213,7 +203,7 @@ const PomodoroApp = ({ user, onBack }) => {
                     timer={currentTimer}
                     isHost={isHost}
                     timerMode={room?.timerMode}
-                    onStart={startTimer}
+                    onStart={handleStartTimer}
                     onPause={pauseTimer}
                     onResume={resumeTimer}
                     onReset={resetTimer}
