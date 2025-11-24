@@ -11,6 +11,7 @@ const TaskItem = ({ task, onToggle, onDelete }) => {
       {/* Checkbox */}
       <button
         onClick={onToggle}
+        aria-label={task.completed ? 'Mark task as incomplete' : 'Mark task as complete'}
         className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
           task.completed
             ? 'bg-green-500 border-green-500'

@@ -1,12 +1,12 @@
 // src/components/PomodoroTimer/Garden/TomatoGarden.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import TomatoPlant from './TomatoPlant';
 import HarvestAnimation from './HarvestAnimation';
 
 const TomatoGarden = ({ tasks, garden }) => {
   const [showHarvest, setShowHarvest] = useState(false);
-  const [prevCompletedCount, setPrevCompletedCount] = useState(0);
+  const prevCompletedCountRef = useRef(0);
 
   const completedTasks = Object.entries(tasks || {})
     .filter(([_, task]) => task.completed)
@@ -15,11 +15,11 @@ const TomatoGarden = ({ tasks, garden }) => {
 
   // Show harvest animation when a new task is completed
   useEffect(() => {
-    if (completedTasks.length > prevCompletedCount && prevCompletedCount > 0) {
+    if (completedTasks.length > prevCompletedCountRef.current && prevCompletedCountRef.current > 0) {
       setShowHarvest(true);
     }
-    setPrevCompletedCount(completedTasks.length);
-  }, [completedTasks.length, prevCompletedCount]);
+    prevCompletedCountRef.current = completedTasks.length;
+  }, [completedTasks.length]);
 
   return (
     <div className="bg-amber-50 rounded-xl p-4 border-2 border-amber-200">

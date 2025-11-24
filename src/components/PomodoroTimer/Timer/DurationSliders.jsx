@@ -1,7 +1,6 @@
 // src/components/PomodoroTimer/Timer/DurationSliders.jsx
 
 import React from 'react';
-import { Timer, Coffee } from 'lucide-react';
 
 const DurationSliders = ({
   workDuration,
@@ -33,6 +32,7 @@ const DurationSliders = ({
           value={workMinutes}
           onChange={(e) => onWorkChange(parseInt(e.target.value) * 60000)}
           disabled={disabled}
+          aria-label="Work duration in minutes"
           className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
         />
       </div>
@@ -54,6 +54,7 @@ const DurationSliders = ({
           value={breakMinutes}
           onChange={(e) => onBreakChange(parseInt(e.target.value) * 60000)}
           disabled={disabled}
+          aria-label="Break duration in minutes"
           className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
         />
       </div>
