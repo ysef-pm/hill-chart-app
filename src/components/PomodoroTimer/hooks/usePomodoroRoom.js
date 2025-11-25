@@ -1,6 +1,6 @@
 // src/components/PomodoroTimer/hooks/usePomodoroRoom.js
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ref, set, get, push, update, onValue, onDisconnect, serverTimestamp, remove, runTransaction } from 'firebase/database';
 import { rtdb } from '../../../firebase';
 import { generateRoomCode, getRandomColor, DEFAULT_WORK_DURATION, DEFAULT_BREAK_DURATION, TIMER_MODES, USER_STATUS } from '../constants';
@@ -14,6 +14,11 @@ export const usePomodoroRoom = (user) => {
   const [isHost, setIsHost] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Compute current user from participants
+  const currentUser = useMemo(() => {
+    return user?.uid ? participants[user.uid] : null;
+  }, [user?.uid, participants]);
 
   // Listen to room changes
   useEffect(() => {
@@ -361,8 +366,6 @@ export const usePomodoroRoom = (user) => {
     const settingsRef = ref(rtdb, `pomodoroRooms/${roomCode}/participants/${user.uid}/settings`);
     await update(settingsRef, newSettings);
   }, [roomCode, user?.uid]);
-
-  const currentUser = user?.uid ? participants[user.uid] : null;
 
   return {
     roomCode,
