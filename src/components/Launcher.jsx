@@ -1,9 +1,12 @@
-import React from 'react';
-import { LogOut, TrendingUp, Smile, MessageSquare, CheckSquare, Heart, BookOpen } from 'lucide-react';
+import React, { useState } from 'react';
+import { LogOut, TrendingUp, Smile, MessageSquare, CheckSquare, Heart, BookOpen, Timer } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
+import { PomodoroApp } from './PomodoroTimer';
 
 const Launcher = ({ onSelectApp, user }) => {
+    const [activeTool, setActiveTool] = useState(null);
+
     const handleSignOut = async () => {
         try {
             await signOut(auth);
@@ -11,6 +14,11 @@ const Launcher = ({ onSelectApp, user }) => {
             console.error("Error signing out:", error);
         }
     };
+
+    // If a tool is active, render it
+    if (activeTool === 'pomodoro') {
+        return <PomodoroApp user={user} onBack={() => setActiveTool(null)} />;
+    }
 
     return (
         <div className="min-h-screen bg-slate-100 p-8">
@@ -99,6 +107,24 @@ const Launcher = ({ onSelectApp, user }) => {
                         <h3 className="text-xl font-bold text-slate-900 mb-2">Habit Tracker</h3>
                         <p className="text-slate-500 text-sm leading-relaxed">
                             Track team habits and routines. See who's building good practices.
+                        </p>
+                    </button>
+
+                    {/* Pomodoro Timer Card */}
+                    <button
+                        onClick={() => setActiveTool('pomodoro')}
+                        className="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl hover:border-red-200 transition-all text-left relative overflow-hidden"
+                    >
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Timer size={120} className="text-red-600" />
+                        </div>
+
+                        <div className="w-12 h-12 bg-red-100 text-red-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <Timer size={24} />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-900 mb-2">Pomodoro Timer</h3>
+                        <p className="text-slate-500 text-sm leading-relaxed">
+                            Collaborative focus timer with task garden and team presence.
                         </p>
                     </button>
 
