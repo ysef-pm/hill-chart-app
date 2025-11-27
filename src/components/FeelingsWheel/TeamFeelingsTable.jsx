@@ -9,7 +9,7 @@ const TeamFeelingsTable = ({ isOpen, onClose, roomCode, participants }) => {
   if (!isOpen) return null;
 
   const participantsWithFeelings = Object.entries(participants || {})
-    .filter(([_, p]) => p.feeling)
+    .filter(([, p]) => p.feeling)
     .sort((a, b) => (b[1].feelingPlacedAt || 0) - (a[1].feelingPlacedAt || 0));
 
   const formatTime = (timestamp) => {

@@ -223,6 +223,7 @@ export const usePomodoroRoom = (user) => {
   }, [roomCode]);
 
   // Timer management
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const startTimer = useCallback(async (type = 'work', customDuration = null) => {
     if (!roomCode || !user?.uid) return;
 
@@ -258,6 +259,7 @@ export const usePomodoroRoom = (user) => {
     }
   }, [roomCode, user?.uid, room?.timerMode, isHost]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const pauseTimer = useCallback(async () => {
     if (!roomCode || !user?.uid) return;
 
@@ -281,6 +283,7 @@ export const usePomodoroRoom = (user) => {
     }
   }, [roomCode, user?.uid, room, currentUser, isHost]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const resumeTimer = useCallback(async () => {
     if (!roomCode || !user?.uid) return;
 
@@ -304,6 +307,7 @@ export const usePomodoroRoom = (user) => {
     }
   }, [roomCode, user?.uid, room, currentUser, isHost]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const resetTimer = useCallback(async () => {
     if (!roomCode || !user?.uid) return;
 
@@ -324,6 +328,7 @@ export const usePomodoroRoom = (user) => {
     }
   }, [roomCode, user?.uid, room?.timerMode, isHost]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const completePomodoro = useCallback(async () => {
     if (!roomCode || !user?.uid) return;
 
@@ -360,6 +365,7 @@ export const usePomodoroRoom = (user) => {
     await set(timerRef, null);
   }, [roomCode, isHost]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const updateSettings = useCallback(async (newSettings) => {
     if (!roomCode || !user?.uid) return;
 

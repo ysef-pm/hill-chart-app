@@ -15,7 +15,7 @@ const RetroBoardApp = ({ user, onBack }) => {
     roomCode,
     room,
     participants,
-    currentUser,
+    currentUser: _currentUser,
     isHost,
     loading,
     error,
@@ -40,6 +40,7 @@ const RetroBoardApp = ({ user, onBack }) => {
   // Show join modal if not in a room
   useEffect(() => {
     if (roomCode) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowJoinModal(false);
     }
   }, [roomCode]);

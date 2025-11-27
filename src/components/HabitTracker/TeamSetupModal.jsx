@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { X, Users, Plus } from 'lucide-react';
 
-const TeamSetupModal = ({ isOpen, onClose, onCreateTeam, onJoinTeam, loading, error }) => {
+const TeamSetupModal = ({ isOpen, onClose, onCreateTeam, onJoinTeam, loading, error, onClearError }) => {
   const [mode, setMode] = useState('choose'); // 'choose' | 'create' | 'join'
   const [teamName, setTeamName] = useState('');
   const [teamCode, setTeamCode] = useState('');
@@ -19,7 +19,9 @@ const TeamSetupModal = ({ isOpen, onClose, onCreateTeam, onJoinTeam, loading, er
   console.log('[TeamSetupModal] Render:', { isOpen, mode, teamName, teamCode });
 
   const handleJoin = async () => {
+    console.log('[TeamSetupModal] handleJoin called with code:', teamCode);
     await onJoinTeam(teamCode.toUpperCase());
+    console.log('[TeamSetupModal] onJoinTeam completed');
     // Don't call onClose() here - let the parent close it when teamId updates
   };
 
@@ -27,7 +29,14 @@ const TeamSetupModal = ({ isOpen, onClose, onCreateTeam, onJoinTeam, loading, er
     setMode('choose');
     setTeamName('');
     setTeamCode('');
+    if (onClearError) onClearError();
     onClose();
+  };
+
+  // Clear error when switching modes
+  const handleModeChange = (newMode) => {
+    if (onClearError) onClearError();
+    setMode(newMode);
   };
 
   return (
@@ -54,7 +63,7 @@ const TeamSetupModal = ({ isOpen, onClose, onCreateTeam, onJoinTeam, loading, er
               </p>
 
               <button
-                onClick={() => setMode('create')}
+                onClick={() => handleModeChange('create')}
                 className="w-full p-4 bg-indigo-50 hover:bg-indigo-100 border-2 border-indigo-200 rounded-xl flex items-center gap-4 transition-colors"
               >
                 <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center">
@@ -67,7 +76,7 @@ const TeamSetupModal = ({ isOpen, onClose, onCreateTeam, onJoinTeam, loading, er
               </button>
 
               <button
-                onClick={() => setMode('join')}
+                onClick={() => handleModeChange('join')}
                 className="w-full p-4 bg-sky-50 hover:bg-sky-100 border-2 border-sky-200 rounded-xl flex items-center gap-4 transition-colors"
               >
                 <div className="w-12 h-12 bg-sky-500 rounded-full flex items-center justify-center">
@@ -104,7 +113,7 @@ const TeamSetupModal = ({ isOpen, onClose, onCreateTeam, onJoinTeam, loading, er
 
               <div className="flex gap-2 pt-4">
                 <button
-                  onClick={() => setMode('choose')}
+                  onClick={() => handleModeChange('choose')}
                   className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
                 >
                   Back
@@ -144,7 +153,7 @@ const TeamSetupModal = ({ isOpen, onClose, onCreateTeam, onJoinTeam, loading, er
 
               <div className="flex gap-2 pt-4">
                 <button
-                  onClick={() => setMode('choose')}
+                  onClick={() => handleModeChange('choose')}
                   className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
                 >
                   Back

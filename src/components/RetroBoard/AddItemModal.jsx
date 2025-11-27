@@ -26,11 +26,6 @@ const AddItemModal = ({ isOpen, onClose, onAdd, section, participants, currentUs
     .filter(([id]) => id !== currentUserId)
     .map(([id, p]) => ({ id, name: p.name }));
 
-  // DEBUG: Add fake participant
-  otherParticipants.push({ id: 'fake-alice', name: 'Alice' });
-
-  console.log('Render: shoutoutTo=', shoutoutTo, 'isCustomShoutout=', isCustomShoutout);
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">

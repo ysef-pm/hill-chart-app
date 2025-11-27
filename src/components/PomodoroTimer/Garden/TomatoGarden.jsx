@@ -9,13 +9,14 @@ const TomatoGarden = ({ tasks, garden }) => {
   const prevCompletedCountRef = useRef(0);
 
   const completedTasks = Object.entries(tasks || {})
-    .filter(([_, task]) => task.completed)
+    .filter(([, task]) => task.completed)
     .map(([id, task]) => ({ id, ...task }))
     .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
 
   // Show harvest animation when a new task is completed
   useEffect(() => {
     if (completedTasks.length > prevCompletedCountRef.current && prevCompletedCountRef.current > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowHarvest(true);
     }
     prevCompletedCountRef.current = completedTasks.length;

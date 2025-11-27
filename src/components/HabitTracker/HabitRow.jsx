@@ -29,7 +29,7 @@ const HabitRow = ({
       </td>
 
       {/* Day checkboxes */}
-      {weekDates.map((date, index) => {
+      {weekDates.map((date) => {
         const dayNum = new Date(date).getDay();
         const isActive = activeDays.includes(dayNum);
         const isChecked = isCheckedByUser(habit.id, date);

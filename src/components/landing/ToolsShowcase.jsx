@@ -1,4 +1,5 @@
 import React from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import goatImg from '../../assets/landing/hill_chart_goat.png';
 import chameleonImg from '../../assets/landing/feelings_wheel_chameleon.png';

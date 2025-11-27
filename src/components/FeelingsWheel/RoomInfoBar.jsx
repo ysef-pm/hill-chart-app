@@ -4,11 +4,11 @@ import React from 'react';
 import { Copy, Check } from 'lucide-react';
 import Avatar from './Avatar';
 
-const RoomInfoBar = ({ roomCode, participants, currentUserId }) => {
+const RoomInfoBar = ({ roomCode, participants }) => {
   const [copied, setCopied] = React.useState(false);
 
   const participantList = Object.entries(participants || {});
-  const pinsPlaced = participantList.filter(([_, p]) => p.feeling).length;
+  const pinsPlaced = participantList.filter(([, p]) => p.feeling).length;
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(roomCode);

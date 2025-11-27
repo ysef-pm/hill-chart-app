@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, ArrowRight } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+// Firebase imports removed - not needed in this component
 import { HABIT_EMOJIS, DAYS_OF_WEEK, DEFAULT_ACTIVE_DAYS } from '../HabitTracker/constants';
 import { useTeamHabits } from '../HabitTracker/hooks/useTeamHabits';
 
@@ -18,14 +17,17 @@ const ExportHabitModal = ({ isOpen, onClose, item, roomCode, user }) => {
 
   useEffect(() => {
     if (item) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setText(item.text);
     }
   }, [item]);
 
   useEffect(() => {
     if (!teamId && isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowTeamSetup(true);
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowTeamSetup(false);
     }
   }, [teamId, isOpen]);

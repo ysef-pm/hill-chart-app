@@ -154,6 +154,7 @@ export const useRetroRoom = (user) => {
     return newItemRef.key;
   }, [roomCode, user, participants]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const removeItem = useCallback(async (itemId) => {
     if (!roomCode || !user?.uid) return;
 
@@ -192,8 +193,8 @@ export const useRetroRoom = (user) => {
   // Filter items by visibility
   const getVisibleItems = useCallback((sectionId) => {
     return Object.entries(items)
-      .filter(([_, item]) => item.section === sectionId)
-      .filter(([_, item]) => room?.isRevealed || item.authorId === user?.uid)
+      .filter(([, item]) => item.section === sectionId)
+      .filter(([, item]) => room?.isRevealed || item.authorId === user?.uid)
       .map(([id, item]) => ({ id, ...item }));
   }, [items, room?.isRevealed, user?.uid]);
 

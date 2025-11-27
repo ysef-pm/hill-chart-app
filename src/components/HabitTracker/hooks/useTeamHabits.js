@@ -6,7 +6,6 @@ import {
   collection,
   setDoc,
   getDoc,
-  getDocs,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -144,41 +143,53 @@ export const useTeamHabits = (user) => {
   }, [user]);
 
   const joinTeam = useCallback(async (code) => {
-    if (!user || !code) return false;
+    console.log('[useTeamHabits] joinTeam called with code:', code);
+    if (!user || !code) {
+      console.log('[useTeamHabits] No user or code, returning false');
+      return false;
+    }
     setLoading(true);
     setError(null);
 
     try {
+      console.log('[useTeamHabits] Checking if team exists...');
       const teamRef = doc(db, 'teams', code);
       const teamDoc = await getDoc(teamRef);
 
       if (!teamDoc.exists()) {
+        console.log('[useTeamHabits] Team not found');
         setError('Team not found');
         setLoading(false);
         return false;
       }
 
+      console.log('[useTeamHabits] Team found, adding user to team members...');
       // Add user to team members
       await updateDoc(teamRef, {
         memberIds: arrayUnion(user.uid),
       });
 
+      console.log('[useTeamHabits] Updating user document...');
       // Update user's teamId
       await setDoc(doc(db, 'users', user.uid), {
         teamId: code,
         displayName: user.displayName || 'Anonymous',
       }, { merge: true });
 
+      console.log('[useTeamHabits] Setting local teamId state to:', code);
       setTeamId(code);
       setLoading(false);
+      console.log('[useTeamHabits] Join successful, returning true');
       return true;
     } catch (err) {
+      console.error('[useTeamHabits] Error joining team:', err);
       setError(err.message);
       setLoading(false);
       return false;
     }
   }, [user]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const addHabit = useCallback(async (text, emoji, activeDays = DEFAULT_ACTIVE_DAYS, sourceRetro = null) => {
     if (!teamId || !user?.uid) return null;
 
@@ -245,6 +256,7 @@ export const useTeamHabits = (user) => {
     return checks[habitId]?.[date] || [];
   }, [checks]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const leaveTeam = useCallback(async () => {
     console.log('[useTeamHabits] leaveTeam called for user:', user?.uid);
     if (!user?.uid) {

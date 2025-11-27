@@ -176,7 +176,7 @@ const Wheel = ({ onSelectFeeling, disabled = false, isRevealed = false, particip
     }
 
     return { segments: result, avatarPositions: avatars };
-  }, [selectedPrimary, selectedSecondary, isRevealed, participants]);
+  }, [selectedPrimary, selectedSecondary, isRevealed, participants, primaryEmotions]);
 
   // Group avatars by position to handle multiple users selecting same feeling
   const groupedAvatars = useMemo(() => {

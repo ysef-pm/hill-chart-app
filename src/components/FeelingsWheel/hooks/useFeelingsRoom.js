@@ -1,7 +1,7 @@
 // src/components/FeelingsWheel/hooks/useFeelingsRoom.js
 
 import { useState, useEffect, useCallback } from 'react';
-import { ref, set, get, onValue, onDisconnect, serverTimestamp, remove } from 'firebase/database';
+import { ref, set, get, onValue, onDisconnect, serverTimestamp } from 'firebase/database';
 import { rtdb } from '../../../firebase';
 import { generateRoomCode, getRandomColor } from '../constants';
 
@@ -42,7 +42,6 @@ export const useFeelingsRoom = (user) => {
   useEffect(() => {
     if (!roomCode || !user?.uid) return;
 
-    const userRef = ref(rtdb, `feelingsRooms/${roomCode}/participants/${user.uid}`);
     const presenceRef = ref(rtdb, `feelingsRooms/${roomCode}/participants/${user.uid}/isOnline`);
 
     // Set online status
@@ -128,6 +127,7 @@ export const useFeelingsRoom = (user) => {
     }
   }, [user]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const updateAvatar = useCallback(async (avatarStyle, avatarColor) => {
     if (!roomCode || !user?.uid) return;
 
@@ -142,6 +142,7 @@ export const useFeelingsRoom = (user) => {
     }
   }, [roomCode, user?.uid]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const placeFeeling = useCallback(async (primary, secondary, tertiary) => {
     if (!roomCode || !user?.uid) return;
 
@@ -156,6 +157,7 @@ export const useFeelingsRoom = (user) => {
     }
   }, [roomCode, user?.uid]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const removeFeeling = useCallback(async () => {
     if (!roomCode || !user?.uid) return;
 

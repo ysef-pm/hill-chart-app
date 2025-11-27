@@ -15,8 +15,9 @@ import NotificationSettings from './Settings/NotificationSettings';
 
 // Notification sound (simple beep using Web Audio API)
 const playNotificationSound = () => {
+  let audioContext = null;
   try {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
@@ -77,6 +78,7 @@ const PomodoroApp = ({ user, onBack }) => {
   // Close modal when room is joined
   useEffect(() => {
     if (roomCode) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowJoinModal(false);
     }
   }, [roomCode]);

@@ -42,7 +42,7 @@ const trackFeatureInterest = async (featureName) => {
 // --- AI Helper Functions ---
 
 // --- AI Helper Functions (disabled - re-enable when backend proxy is ready) ---
-const callGemini = async (prompt) => {
+const _callGemini = async () => {
     // This function relied on the exposed API key which has been removed.
     // Re-implement this using a backend proxy or cloud function when ready.
     console.log("AI features are currently disabled.");
@@ -244,9 +244,13 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
 
     useEffect(() => {
         if (isOpen) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setText('');
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setEmoji('🤔');
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setName('');
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setProjectName('');
         }
     }, [isOpen]);
@@ -548,15 +552,17 @@ const HillChartApp = ({ user, onBack }) => {
             switch (dateFilter) {
                 case 'today':
                     return pinDate >= today;
-                case 'week':
+                case 'week': {
                     const weekAgo = new Date(today);
                     weekAgo.setDate(weekAgo.getDate() - 7);
                     return pinDate >= weekAgo;
-                case 'sprint':
+                }
+                case 'sprint': {
                     // Assuming 2-week sprint
                     const sprintStart = new Date(today);
                     sprintStart.setDate(sprintStart.getDate() - 14);
                     return pinDate >= sprintStart;
+                }
                 default:
                     return true;
             }

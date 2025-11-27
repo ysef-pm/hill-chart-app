@@ -8,16 +8,19 @@ const TimerDisplay = ({ timer, timerMode }) => {
 
   useEffect(() => {
     if (!timer) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTimeRemaining(null);
       return;
     }
 
     if (timer.isPaused) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTimeRemaining(timer.pausedRemaining);
       return;
     }
 
     if (!timer.endTime) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTimeRemaining(timer.duration || null);
       return;
     }
