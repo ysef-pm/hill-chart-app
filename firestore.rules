@@ -22,18 +22,55 @@ service cloud.firestore {
     match /teams/{teamId} {
       // Allow creating a new team
       allow create: if isAuthenticated();
-      
+
       // Allow reading and updating if user is a member
       allow read, update: if isTeamMember(teamId);
-      
+
       // Habits subcollection
       match /habits/{habitId} {
         allow read, write: if isTeamMember(teamId);
-        
+
         // Checks subcollection
         match /checks/{checkId} {
           allow read, write: if isTeamMember(teamId);
         }
+      }
+    }
+
+    // Kudos Board - User team preferences
+    match /kudosUsers/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Kudos Board - Teams
+    match /kudosTeams/{teamId} {
+      // Anyone can read team existence for joining
+      allow read: if request.auth != null;
+
+      // Team info subcollection
+      match /info/{docId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null;
+        allow update: if request.auth != null &&
+          exists(/databases/$(database)/documents/kudosTeams/$(teamId)/members/$(request.auth.uid));
+      }
+
+      // Members subcollection
+      match /members/{memberId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null && request.auth.uid == memberId;
+        allow update: if request.auth != null && request.auth.uid == memberId;
+        allow delete: if request.auth != null && request.auth.uid == memberId;
+      }
+
+      // Kudos subcollection
+      match /kudos/{kudoId} {
+        allow read: if request.auth != null &&
+          exists(/databases/$(database)/documents/kudosTeams/$(teamId)/members/$(request.auth.uid));
+        allow create: if request.auth != null &&
+          exists(/databases/$(database)/documents/kudosTeams/$(teamId)/members/$(request.auth.uid));
+        allow update: if request.auth != null &&
+          exists(/databases/$(database)/documents/kudosTeams/$(teamId)/members/$(request.auth.uid));
       }
     }
   }
