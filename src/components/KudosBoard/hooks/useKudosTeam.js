@@ -14,6 +14,7 @@ import {
   query,
   orderBy,
   serverTimestamp,
+  Timestamp,
 } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { generateInviteCode, generateTeamId, SPOTLIGHT_DURATION } from '../constants';
@@ -257,7 +258,7 @@ export const useKudosTeam = (user) => {
         displayName: members[uid]?.displayName || 'Unknown',
       }));
 
-      const spotlightUntil = new Date(Date.now() + SPOTLIGHT_DURATION);
+      const spotlightUntil = Timestamp.fromMillis(Date.now() + SPOTLIGHT_DURATION);
 
       const kudosRef = collection(db, 'kudosTeams', teamId, 'kudos');
       const docRef = await addDoc(kudosRef, {
@@ -308,14 +309,19 @@ export const useKudosTeam = (user) => {
   }, [teamId, user]);
 
   // Computed: active celebrations (in spotlight)
-  const activeCelebrations = kudos.filter(
-    (k) => k.type === 'celebration' && k.spotlightUntil && new Date(k.spotlightUntil.toDate()) > new Date()
-  );
+  const activeCelebrations = kudos.filter((k) => {
+    if (k.type !== 'celebration' || !k.spotlightUntil) return false;
+    const until = k.spotlightUntil.toDate ? k.spotlightUntil.toDate() : new Date(k.spotlightUntil);
+    return until > new Date();
+  });
 
   // Computed: wall items (all kudos + expired celebrations)
-  const wallKudos = kudos.filter(
-    (k) => k.type === 'kudos' || !k.spotlightUntil || new Date(k.spotlightUntil.toDate()) <= new Date()
-  );
+  const wallKudos = kudos.filter((k) => {
+    if (k.type === 'kudos') return true;
+    if (!k.spotlightUntil) return true;
+    const until = k.spotlightUntil.toDate ? k.spotlightUntil.toDate() : new Date(k.spotlightUntil);
+    return until <= new Date();
+  });
 
   // Check if current user is admin
   const isAdmin = members[user?.uid]?.role === 'admin';
