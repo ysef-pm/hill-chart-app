@@ -12,6 +12,7 @@ import {
   deleteField,
   onSnapshot,
   query,
+  where,
   orderBy,
   serverTimestamp,
   Timestamp,
@@ -109,6 +110,12 @@ export const useKudosTeam = (user) => {
       const newTeamId = generateTeamId();
       const inviteCode = generateInviteCode();
 
+      // Create team document at root level (for querying by inviteCode)
+      await setDoc(doc(db, 'kudosTeams', newTeamId), {
+        inviteCode,
+        createdAt: serverTimestamp(),
+      });
+
       // Create team info document
       await setDoc(doc(db, 'kudosTeams', newTeamId, 'info', 'main'), {
         name: teamName || 'My Team',
@@ -147,23 +154,18 @@ export const useKudosTeam = (user) => {
     setError(null);
 
     try {
-      // Find team by invite code
-      const teamsSnapshot = await getDocs(collection(db, 'kudosTeams'));
-      let foundTeamId = null;
+      // Find team by invite code using query
+      const teamsRef = collection(db, 'kudosTeams');
+      const q = query(teamsRef, where('inviteCode', '==', inviteCode.toUpperCase()));
+      const querySnapshot = await getDocs(q);
 
-      for (const teamDoc of teamsSnapshot.docs) {
-        const infoDoc = await getDoc(doc(db, 'kudosTeams', teamDoc.id, 'info', 'main'));
-        if (infoDoc.exists() && infoDoc.data().inviteCode === inviteCode.toUpperCase()) {
-          foundTeamId = teamDoc.id;
-          break;
-        }
-      }
-
-      if (!foundTeamId) {
+      if (querySnapshot.empty) {
         setError('Team not found. Check your invite code.');
         setLoading(false);
         return false;
       }
+
+      const foundTeamId = querySnapshot.docs[0].id;
 
       // Add user as member
       await setDoc(doc(db, 'kudosTeams', foundTeamId, 'members', user.uid), {
@@ -213,8 +215,11 @@ export const useKudosTeam = (user) => {
   }, [user, teamId]);
 
   // Give kudos
-  const giveKudos = useCallback(async ({ category, message, recipientIds }) => {
-    if (!teamId || !user?.uid || !message || recipientIds.length === 0) return null;
+  const giveKudos = useCallback(async ({ category, message, recipientIds, customRecipientNames = [] }) => {
+    if (!teamId || !user?.uid || !message) return null;
+
+    // Must have at least one recipient (member or custom)
+    if (recipientIds.length === 0 && customRecipientNames.length === 0) return null;
 
     // Prevent self-kudos
     if (recipientIds.includes(user.uid)) {
@@ -223,10 +228,16 @@ export const useKudosTeam = (user) => {
     }
 
     try {
-      const recipients = recipientIds.map((uid) => ({
+      // Combine member recipients and custom name recipients
+      const memberRecipients = recipientIds.map((uid) => ({
         uid,
         displayName: members[uid]?.displayName || 'Unknown',
       }));
+      const customRecipients = customRecipientNames.map((name) => ({
+        uid: null,
+        displayName: name,
+      }));
+      const recipients = [...memberRecipients, ...customRecipients];
 
       const kudosRef = collection(db, 'kudosTeams', teamId, 'kudos');
       const docRef = await addDoc(kudosRef, {

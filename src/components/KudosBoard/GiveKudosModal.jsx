@@ -1,16 +1,20 @@
 // src/components/KudosBoard/GiveKudosModal.jsx
 
 import React, { useState } from 'react';
-import { X, Loader2, Check } from 'lucide-react';
+import { X, Loader2, Check, Plus } from 'lucide-react';
 import { KUDOS_CATEGORIES, MESSAGE_MIN_LENGTH, MESSAGE_MAX_LENGTH } from './constants';
 
 const GiveKudosModal = ({ isOpen, onClose, members, currentUserId, onSubmit, loading }) => {
   const [selectedRecipients, setSelectedRecipients] = useState([]);
+  const [customRecipients, setCustomRecipients] = useState([]);
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customName, setCustomName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [message, setMessage] = useState('');
 
   const memberList = Object.values(members).filter((m) => m.uid !== currentUserId && !m.leftAt);
-  const isValid = selectedRecipients.length > 0 && selectedCategory && message.length >= MESSAGE_MIN_LENGTH;
+  const hasRecipients = selectedRecipients.length > 0 || customRecipients.length > 0;
+  const isValid = hasRecipients && selectedCategory && message.length >= MESSAGE_MIN_LENGTH;
 
   const handleSubmit = async () => {
     if (!isValid) return;
@@ -19,14 +23,30 @@ const GiveKudosModal = ({ isOpen, onClose, members, currentUserId, onSubmit, loa
       category: selectedCategory,
       message,
       recipientIds: selectedRecipients,
+      customRecipientNames: customRecipients,
     });
 
     if (success) {
       setSelectedRecipients([]);
+      setCustomRecipients([]);
+      setShowCustomInput(false);
+      setCustomName('');
       setSelectedCategory(null);
       setMessage('');
       onClose();
     }
+  };
+
+  const addCustomRecipient = () => {
+    if (customName.trim() && !customRecipients.includes(customName.trim())) {
+      setCustomRecipients((prev) => [...prev, customName.trim()]);
+      setCustomName('');
+      setShowCustomInput(false);
+    }
+  };
+
+  const removeCustomRecipient = (name) => {
+    setCustomRecipients((prev) => prev.filter((n) => n !== name));
   };
 
   const toggleRecipient = (uid) => {
@@ -55,6 +75,7 @@ const GiveKudosModal = ({ isOpen, onClose, members, currentUserId, onSubmit, loa
               Who deserves kudos?
             </label>
             <div className="flex flex-wrap gap-2">
+              {/* Team members */}
               {memberList.map((member) => {
                 const isSelected = selectedRecipients.includes(member.uid);
                 return (
@@ -74,6 +95,53 @@ const GiveKudosModal = ({ isOpen, onClose, members, currentUserId, onSubmit, loa
                   </button>
                 );
               })}
+              {/* Custom recipients */}
+              {customRecipients.map((name) => (
+                <button
+                  key={name}
+                  onClick={() => removeCustomRecipient(name)}
+                  className="px-3 py-1.5 rounded-full text-sm font-medium bg-rose-100 text-rose-700 border-2 border-rose-300 flex items-center gap-1.5"
+                >
+                  <Check size={14} />
+                  {name}
+                  <X size={14} className="ml-1" />
+                </button>
+              ))}
+              {/* Someone else button/input */}
+              {showCustomInput ? (
+                <div className="flex items-center gap-1">
+                  <input
+                    type="text"
+                    placeholder="Enter name..."
+                    value={customName}
+                    onChange={(e) => setCustomName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && addCustomRecipient()}
+                    className="px-3 py-1.5 border border-slate-300 rounded-full text-sm w-32 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none"
+                    autoFocus
+                  />
+                  <button
+                    onClick={addCustomRecipient}
+                    disabled={!customName.trim()}
+                    className="p-1.5 bg-rose-600 text-white rounded-full hover:bg-rose-700 disabled:opacity-50"
+                  >
+                    <Plus size={14} />
+                  </button>
+                  <button
+                    onClick={() => { setShowCustomInput(false); setCustomName(''); }}
+                    className="p-1.5 hover:bg-slate-100 rounded-full"
+                  >
+                    <X size={14} className="text-slate-500" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowCustomInput(true)}
+                  className="px-3 py-1.5 rounded-full text-sm font-medium bg-slate-100 text-slate-600 border-2 border-dashed border-slate-300 hover:bg-slate-200 flex items-center gap-1.5"
+                >
+                  <Plus size={14} />
+                  Someone else...
+                </button>
+              )}
             </div>
           </div>
 
