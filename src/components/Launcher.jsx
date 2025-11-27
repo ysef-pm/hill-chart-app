@@ -128,25 +128,23 @@ const Launcher = ({ onSelectApp, user }) => {
                         </p>
                     </button>
 
-                    {/* Kudos Board Card - Coming Soon */}
-                    <div className="relative bg-slate-50 p-6 rounded-2xl border border-dashed border-slate-300 text-left overflow-hidden opacity-60">
-                        <div className="absolute top-3 right-3">
-                            <span className="px-2 py-1 bg-slate-200 text-slate-500 text-xs font-medium rounded-full">
-                                Coming Soon
-                            </span>
-                        </div>
-                        <div className="absolute top-0 right-0 p-4 opacity-5">
-                            <Heart size={120} className="text-slate-400" />
+                    {/* Kudos Board Card */}
+                    <button
+                        onClick={() => onSelectApp('kudos-board')}
+                        className="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-xl hover:border-rose-200 transition-all text-left relative overflow-hidden"
+                    >
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Heart size={120} className="text-rose-600" />
                         </div>
 
-                        <div className="w-12 h-12 bg-slate-200 text-slate-400 rounded-xl flex items-center justify-center mb-4">
+                        <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                             <Heart size={24} />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-400 mb-2">Kudos Board</h3>
-                        <p className="text-slate-400 text-sm leading-relaxed">
+                        <h3 className="text-xl font-bold text-slate-900 mb-2">Kudos Board</h3>
+                        <p className="text-slate-500 text-sm leading-relaxed">
                             Celebrate wins and give shoutouts to teammates for great work.
                         </p>
-                    </div>
+                    </button>
 
                     {/* Decision Log Card - Coming Soon */}
                     <div className="relative bg-slate-50 p-6 rounded-2xl border border-dashed border-slate-300 text-left overflow-hidden opacity-60">

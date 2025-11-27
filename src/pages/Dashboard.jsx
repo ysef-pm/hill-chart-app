@@ -4,6 +4,7 @@ import HillChartApp from '../components/HillChartApp';
 import { FeelingsWheelApp } from '../components/FeelingsWheel';
 import { RetroBoardApp } from '../components/RetroBoard';
 import { HabitTrackerApp } from '../components/HabitTracker';
+import { KudosBoardApp } from '../components/KudosBoard';
 
 export default function Dashboard({ user }) {
     const [currentApp, setCurrentApp] = useState(null); // null = Launcher
@@ -22,6 +23,10 @@ export default function Dashboard({ user }) {
 
     if (currentApp === 'habit-tracker') {
         return <HabitTrackerApp user={user} onBack={() => setCurrentApp(null)} />;
+    }
+
+    if (currentApp === 'kudos-board') {
+        return <KudosBoardApp user={user} onBack={() => setCurrentApp(null)} />;
     }
 
     return <Launcher user={user} onSelectApp={setCurrentApp} />;
