@@ -59,6 +59,7 @@ service cloud.firestore {
 
     match /kudosTeams/{teamId} {
       allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
 
       match /info/{docId} {
         allow read: if isAuthenticated();
