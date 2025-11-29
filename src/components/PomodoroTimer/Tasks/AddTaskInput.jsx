@@ -22,12 +22,12 @@ const AddTaskInput = ({ onAdd, disabled }) => {
         onChange={(e) => setText(e.target.value)}
         placeholder="Add a new task..."
         disabled={disabled}
-        className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm disabled:opacity-50"
+        className="flex-1 px-4 py-2 bg-[var(--color-surface-1)] border border-[var(--color-border-default)] rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] disabled:opacity-50"
       />
       <button
         type="submit"
         disabled={disabled || !text.trim()}
-        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg disabled:opacity-50 transition-colors"
+        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg disabled:opacity-50 transition-colors shadow-lg shadow-red-500/20"
       >
         <Plus size={20} />
       </button>

@@ -24,7 +24,7 @@ const MemberStatus = ({ participant }) => {
       {/* Avatar */}
       <div
         className={`w-8 h-8 rounded-full flex items-center justify-center
-                    text-white text-xs font-bold ring-2 ring-offset-2 ${ringClass}
+                    text-white text-xs font-bold ring-2 ring-offset-2 ring-offset-[var(--color-bg-primary)] ${ringClass}
                     ${!participant.isOnline ? 'opacity-50' : ''}`}
         style={{ backgroundColor: participant.avatarColor }}
       >
@@ -33,14 +33,14 @@ const MemberStatus = ({ participant }) => {
 
       {/* Status dot */}
       <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full
-                       border-2 border-white ${dotClass}`}
+                       border-2 border-[var(--color-bg-primary)] ${dotClass}`}
       />
 
       {/* Tooltip */}
       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2
-                      bg-slate-800 text-white text-xs rounded px-2 py-1
+                      bg-[var(--color-surface-3)] text-[var(--color-text-primary)] text-xs rounded px-2 py-1
                       opacity-0 group-hover:opacity-100 whitespace-nowrap
-                      pointer-events-none z-10 transition-opacity">
+                      pointer-events-none z-10 transition-opacity border border-[var(--color-border-subtle)]">
         {participant.name} - {participant.status || 'idle'}
         {!participant.isOnline && ' (offline)'}
       </div>

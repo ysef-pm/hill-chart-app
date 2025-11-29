@@ -57,16 +57,16 @@ const ExportHabitModal = ({ isOpen, onClose, item, roomCode, user }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="glass-card-elevated max-w-md w-full overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-sky-50">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--color-border-subtle)] bg-sky-500/10">
           <div className="flex items-center gap-2">
-            <ArrowRight size={20} className="text-sky-600" />
-            <h2 className="text-lg font-bold text-sky-900">Create Habit from Action</h2>
+            <ArrowRight size={20} className="text-sky-400" />
+            <h2 className="text-lg font-bold text-[var(--color-text-primary)]">Create Habit from Action</h2>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/50 rounded-full">
-            <X size={20} className="text-slate-600" />
+          <button onClick={onClose} className="p-2 hover:bg-[var(--color-surface-2)] rounded-full">
+            <X size={20} className="text-[var(--color-text-tertiary)]" />
           </button>
         </div>
 
@@ -74,11 +74,11 @@ const ExportHabitModal = ({ isOpen, onClose, item, roomCode, user }) => {
         <div className="p-6">
           {showTeamSetup ? (
             <div className="space-y-4">
-              <p className="text-slate-600 text-sm">
+              <p className="text-[var(--color-text-secondary)] text-sm">
                 You need to be part of a team to track habits. Create one now:
               </p>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">
                   Team Name
                 </label>
                 <input
@@ -86,37 +86,37 @@ const ExportHabitModal = ({ isOpen, onClose, item, roomCode, user }) => {
                   value={teamName}
                   onChange={(e) => setTeamName(e.target.value)}
                   placeholder="e.g., My Team"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-4 py-2 border border-[var(--color-border-default)] bg-[var(--color-surface-1)] rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]"
                 />
               </div>
               <button
                 onClick={handleCreateTeam}
                 disabled={loading || !teamName.trim()}
-                className="w-full px-4 py-2 bg-sky-500 text-white rounded-lg font-medium hover:bg-sky-600 disabled:opacity-50"
+                className="w-full px-4 py-2 bg-sky-500 text-white rounded-lg font-medium hover:bg-sky-600 disabled:opacity-50 shadow-lg shadow-sky-500/20"
               >
                 {loading ? 'Creating...' : 'Create Team'}
               </button>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <p className="text-sm text-slate-600">Exporting to: <strong>{team?.name}</strong></p>
+              <div className="p-3 bg-[var(--color-surface-1)] rounded-lg border border-[var(--color-border-subtle)]">
+                <p className="text-sm text-[var(--color-text-secondary)]">Exporting to: <strong className="text-[var(--color-text-primary)]">{team?.name}</strong></p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">
                   Habit Description
                 </label>
                 <input
                   type="text"
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-4 py-2 border border-[var(--color-border-default)] bg-[var(--color-surface-1)] rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
                   Emoji
                 </label>
                 <div className="flex gap-2 flex-wrap">
@@ -127,8 +127,8 @@ const ExportHabitModal = ({ isOpen, onClose, item, roomCode, user }) => {
                       onClick={() => setEmoji(e)}
                       className={`w-9 h-9 text-lg rounded-lg flex items-center justify-center transition-all ${
                         emoji === e
-                          ? 'bg-sky-100 ring-2 ring-sky-500 scale-110'
-                          : 'bg-slate-100 hover:bg-slate-200'
+                          ? 'bg-sky-500/20 ring-2 ring-sky-500 scale-110'
+                          : 'bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)]'
                       }`}
                     >
                       {e}
@@ -138,7 +138,7 @@ const ExportHabitModal = ({ isOpen, onClose, item, roomCode, user }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
                   Track on
                 </label>
                 <div className="flex gap-1">
@@ -150,7 +150,7 @@ const ExportHabitModal = ({ isOpen, onClose, item, roomCode, user }) => {
                       className={`flex-1 py-2 text-xs font-medium rounded-lg transition-colors ${
                         activeDays.includes(day.id)
                           ? 'bg-sky-500 text-white'
-                          : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                          : 'bg-[var(--color-surface-2)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-3)]'
                       }`}
                     >
                       {day.short}
@@ -162,14 +162,14 @@ const ExportHabitModal = ({ isOpen, onClose, item, roomCode, user }) => {
               <div className="flex gap-2 pt-2">
                 <button
                   onClick={onClose}
-                  className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
+                  className="flex-1 px-4 py-2 border border-[var(--color-border-default)] text-[var(--color-text-secondary)] rounded-lg hover:bg-[var(--color-surface-2)]"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleExport}
                   disabled={!text.trim()}
-                  className="flex-1 px-4 py-2 bg-sky-500 text-white rounded-lg font-medium hover:bg-sky-600 disabled:opacity-50"
+                  className="flex-1 px-4 py-2 bg-sky-500 text-white rounded-lg font-medium hover:bg-sky-600 disabled:opacity-50 shadow-lg shadow-sky-500/20"
                 >
                   Create Habit
                 </button>

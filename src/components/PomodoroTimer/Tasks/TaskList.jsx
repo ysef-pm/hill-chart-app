@@ -14,7 +14,7 @@ const TaskList = ({ tasks, onAdd, onToggle, onDelete }) => {
       {/* Header */}
       <div className="flex items-center gap-2">
         <span className="text-xl">📝</span>
-        <h3 className="font-bold text-slate-900">Task Garden</h3>
+        <h3 className="font-semibold text-[var(--color-text-primary)]">Task Garden</h3>
       </div>
 
       {/* Add task input */}
@@ -23,7 +23,7 @@ const TaskList = ({ tasks, onAdd, onToggle, onDelete }) => {
       {/* Incomplete tasks */}
       <div className="space-y-2">
         {incompleteTasks.length === 0 ? (
-          <p className="text-sm text-slate-500 text-center py-4">
+          <p className="text-sm text-[var(--color-text-muted)] text-center py-4">
             No tasks yet. Add a task to get started!
           </p>
         ) : (
@@ -40,8 +40,8 @@ const TaskList = ({ tasks, onAdd, onToggle, onDelete }) => {
 
       {/* Completed tasks count */}
       {completedTasks.length > 0 && (
-        <div className="pt-2 border-t border-slate-200">
-          <p className="text-sm text-green-600 font-medium">
+        <div className="pt-2 border-t border-[var(--color-border-subtle)]">
+          <p className="text-sm text-green-400 font-medium">
             ✓ {completedTasks.length} task{completedTasks.length !== 1 ? 's' : ''} completed
           </p>
         </div>

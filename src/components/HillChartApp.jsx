@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { MessageSquare, X, Plus, MapPin, Trash2, Info, Sparkles, FileText, Loader2, Camera, Download, Filter, LogOut, ArrowLeft } from 'lucide-react';
+import { X, MapPin, Trash2, Sparkles, Loader2, Download, Filter, ArrowLeft, Layers } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { db } from '../firebase';
 import {
@@ -17,7 +17,6 @@ import {
 } from 'firebase/firestore';
 
 // --- Configuration ---
-
 const appId = 'hill-chart-app';
 
 // --- Analytics Helper ---
@@ -29,7 +28,6 @@ const trackFeatureInterest = async (featureName) => {
             lastUpdated: serverTimestamp()
         });
     } catch (error) {
-        // Document may not exist yet, create it
         if (error.code === 'not-found') {
             await setDoc(analyticsRef, {
                 [featureName]: 1,
@@ -39,62 +37,7 @@ const trackFeatureInterest = async (featureName) => {
     }
 };
 
-// --- AI Helper Functions ---
-
-// --- AI Helper Functions (disabled - re-enable when backend proxy is ready) ---
-const _callGemini = async () => {
-    // This function relied on the exposed API key which has been removed.
-    // Re-implement this using a backend proxy or cloud function when ready.
-    console.log("AI features are currently disabled.");
-    return "AI features are currently disabled.";
-};
-/* Original Implementation:
-const callGemini = async (prompt) => {
-    // This function relied on the exposed API key which has been removed.
-    // Re-implement this using a backend proxy or cloud function when ready.
-    
-    /*
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
-    const payload = {
-        contents: [{ parts: [{ text: prompt }] }]
-    };
-
-    const makeRequest = async (retryCount = 0) => {
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                if (retryCount < 5) {
-                    const delay = Math.pow(2, retryCount) * 1000;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    return makeRequest(retryCount + 1);
-                }
-                throw new Error(`API Error: ${response.status}`);
-            }
-
-            const data = await response.json();
-            return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated.";
-        } catch (error) {
-            if (retryCount < 5) {
-                const delay = Math.pow(2, retryCount) * 1000;
-                await new Promise(resolve => setTimeout(resolve, delay));
-                return makeRequest(retryCount + 1);
-            }
-            console.error("Gemini API failed:", error);
-            return "Sorry, I couldn't generate a response at this time.";
-        }
-    };
-
-    return makeRequest();
-};
-*/
-
 // --- Components ---
-
 const FEELING_EMOJIS = ['🤔', '😤', '😌', '🤩', '🤠', '🚧', '🔥', '🐛', '🆘', '✅'];
 
 const HillChart = ({ pins, onAddPin, onDeletePin }) => {
@@ -124,34 +67,42 @@ const HillChart = ({ pins, onAddPin, onDeletePin }) => {
         setHoverX(Math.max(0, Math.min(100, x)));
     };
 
-    const handleMouseLeave = () => {
-        setHoverX(null);
-    };
+    const handleMouseLeave = () => setHoverX(null);
 
     const handleClick = () => {
-        if (hoverX !== null) {
-            onAddPin(hoverX);
-        }
+        if (hoverX !== null) onAddPin(hoverX);
     };
 
-    const getPinCoords = (xPerc) => {
-        const yPerc = 100 - (getHillY(xPerc) * 80);
-        return { x: xPerc, y: yPerc };
-    };
+    const getPinCoords = (xPerc) => ({
+        x: xPerc,
+        y: 100 - (getHillY(xPerc) * 80)
+    });
 
     const ghostPin = hoverX !== null ? getPinCoords(hoverX) : null;
 
     return (
         <div className="relative w-full aspect-[2/1] max-h-[500px] select-none group">
-            <div className="absolute inset-0 bg-slate-50 rounded-xl border border-slate-200/60 shadow-inner overflow-hidden">
-                <div className="absolute inset-0 opacity-30"
-                    style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
-                </div>
+            {/* Background */}
+            <div className="absolute inset-0 rounded-2xl bg-[var(--color-surface-1)] border border-[var(--color-border-subtle)] overflow-hidden">
+                <div
+                    className="absolute inset-0 opacity-[0.03]"
+                    style={{
+                        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)',
+                        backgroundSize: '24px 24px'
+                    }}
+                />
             </div>
 
-            <div className="absolute bottom-4 left-4 text-slate-400 text-xs font-bold uppercase tracking-wider">Figuring it out</div>
-            <div className="absolute bottom-4 right-4 text-slate-400 text-xs font-bold uppercase tracking-wider">Getting it done</div>
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 text-slate-300 text-xs font-bold uppercase tracking-wider">Peak Uncertainty</div>
+            {/* Labels */}
+            <div className="absolute bottom-4 left-4 text-[var(--color-text-muted)] text-[10px] font-semibold uppercase tracking-wider">
+                Figuring it out
+            </div>
+            <div className="absolute bottom-4 right-4 text-[var(--color-text-muted)] text-[10px] font-semibold uppercase tracking-wider">
+                Getting it done
+            </div>
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 text-[var(--color-text-muted)] text-[10px] font-semibold uppercase tracking-wider opacity-60">
+                Peak
+            </div>
 
             <svg
                 ref={svgRef}
@@ -162,24 +113,28 @@ const HillChart = ({ pins, onAddPin, onDeletePin }) => {
                 onMouseLeave={handleMouseLeave}
                 onClick={handleClick}
             >
-                <path
-                    d={pathData}
-                    fill="transparent"
-                    stroke="#94a3b8"
-                    strokeWidth="0.5"
-                    strokeDasharray="1 1"
-                    className="opacity-50"
-                />
+                {/* Filled area under curve */}
+                <defs>
+                    <linearGradient id="hillGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="rgba(20, 184, 166, 0.15)" />
+                        <stop offset="100%" stopColor="rgba(20, 184, 166, 0)" />
+                    </linearGradient>
+                </defs>
+                <path d={pathData} fill="url(#hillGradient)" />
+
+                {/* Hill curve line */}
                 <path
                     d={pathData}
                     fill="none"
-                    stroke="#3b82f6"
-                    strokeWidth="0.8"
-                    className="drop-shadow-lg"
+                    stroke="rgba(20, 184, 166, 0.6)"
+                    strokeWidth="0.6"
                 />
-                <line x1="50" y1="100" x2="50" y2="20" stroke="#cbd5e1" strokeWidth="0.2" strokeDasharray="2 2" />
+
+                {/* Center line */}
+                <line x1="50" y1="100" x2="50" y2="20" stroke="rgba(255,255,255,0.1)" strokeWidth="0.3" strokeDasharray="2 2" />
             </svg>
 
+            {/* Pins */}
             {pins.map((pin) => {
                 const coords = getPinCoords(pin.x);
                 const isUphill = pin.x < 50;
@@ -191,33 +146,39 @@ const HillChart = ({ pins, onAddPin, onDeletePin }) => {
                         style={{ left: `${coords.x}%`, top: `${coords.y}%`, transform: 'translate(-50%, -50%)' }}
                     >
                         <div
-                            className={`w-4 h-4 rounded-full border-2 border-white shadow-md cursor-pointer transition-transform hover:scale-125 ${isUphill ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                        ></div>
+                            className={`w-4 h-4 rounded-full border-2 border-[var(--color-bg-primary)] shadow-lg cursor-pointer transition-transform hover:scale-125 ${
+                                isUphill ? 'bg-amber-500' : 'bg-emerald-500'
+                            }`}
+                        />
 
-                        <div className="absolute bottom-6 opacity-0 scale-90 group-hover/pin:opacity-100 group-hover/pin:scale-100 transition-all duration-200 w-56 pointer-events-none z-30">
-                            <div className="bg-white rounded-lg shadow-xl p-3 border border-slate-100 text-center">
-                                <div className="text-2xl mb-1">{pin.emoji}</div>
+                        {/* Tooltip */}
+                        <div className="absolute bottom-6 opacity-0 scale-90 group-hover/pin:opacity-100 group-hover/pin:scale-100 transition-all duration-200 w-60 pointer-events-none z-30">
+                            <div className="glass-card-elevated p-4 text-center">
+                                <div className="text-2xl mb-2">{pin.emoji}</div>
                                 {pin.projectName && (
-                                    <div className="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md mb-2 inline-block border border-indigo-100">
+                                    <div className="inline-block px-2 py-0.5 rounded-full bg-[var(--color-accent-subtle)] text-[var(--color-accent)] text-[10px] font-semibold uppercase tracking-wider mb-2">
                                         {pin.projectName}
                                     </div>
                                 )}
-                                <p className="text-sm font-medium text-slate-700 leading-tight mb-1">{pin.text}</p>
-                                {pin.name && <p className="text-xs font-semibold text-blue-600 mb-1">👤 {pin.name}</p>}
+                                <p className="text-sm font-medium text-[var(--color-text-primary)] leading-snug mb-1">{pin.text}</p>
+                                {pin.name && <p className="text-xs text-[var(--color-accent)] mb-1">{pin.name}</p>}
                                 {pin.createdAt && (
-                                    <p className="text-[10px] text-slate-400 mb-1">
-                                        📅 {new Date(pin.createdAt.seconds * 1000).toLocaleDateString()} {new Date(pin.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    <p className="text-[10px] text-[var(--color-text-muted)]">
+                                        {new Date(pin.createdAt.seconds * 1000).toLocaleDateString()}
                                     </p>
                                 )}
-                                <p className="text-[10px] text-slate-400">{isUphill ? '🧗 Uphill' : '⛷️ Downhill'}</p>
+                                <p className="text-[10px] text-[var(--color-text-muted)] mt-1">
+                                    {isUphill ? 'Uphill' : 'Downhill'}
+                                </p>
                             </div>
-                            <div className="w-3 h-3 bg-white transform rotate-45 border-r border-b border-slate-100 absolute -bottom-1.5 left-1/2 -translate-x-1/2 shadow-sm"></div>
+                            <div className="w-3 h-3 bg-[var(--color-surface-3)] transform rotate-45 absolute -bottom-1.5 left-1/2 -translate-x-1/2 border-r border-b border-[var(--color-border-subtle)]" />
                         </div>
 
+                        {/* Delete button */}
                         <button
                             onClick={(e) => { e.stopPropagation(); onDeletePin(pin.id); }}
-                            className="absolute -top-8 opacity-0 group-hover/pin:opacity-100 bg-red-100 hover:bg-red-200 p-1 rounded-full text-red-600 transition-colors pointer-events-auto"
-                            title="Delete Update"
+                            className="absolute -top-8 opacity-0 group-hover/pin:opacity-100 bg-red-500/20 hover:bg-red-500/40 p-1.5 rounded-full text-red-400 transition-all pointer-events-auto"
+                            title="Delete"
                         >
                             <Trash2 size={12} />
                         </button>
@@ -225,9 +186,10 @@ const HillChart = ({ pins, onAddPin, onDeletePin }) => {
                 );
             })}
 
+            {/* Ghost pin */}
             {ghostPin && (
                 <div
-                    className="absolute z-10 pointer-events-none w-3 h-3 rounded-full bg-blue-400/50 border border-blue-400 shadow-sm animate-pulse"
+                    className="absolute z-10 pointer-events-none w-3 h-3 rounded-full bg-[var(--color-accent)]/40 border border-[var(--color-accent)] shadow-lg animate-pulse"
                     style={{ left: `${ghostPin.x}%`, top: `${ghostPin.y}%`, transform: 'translate(-50%, -50%)' }}
                 />
             )}
@@ -244,13 +206,9 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
 
     useEffect(() => {
         if (isOpen) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setText('');
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setEmoji('🤔');
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setName('');
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setProjectName('');
         }
     }, [isOpen]);
@@ -259,54 +217,53 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
 
     const isUphill = initialX < 50;
 
-    const handleSuggest = () => {
-        setIsComingSoonOpen(true);
-    };
-
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100 p-6 m-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+            <div className="glass-card-elevated w-full max-w-md p-6 m-4 animate-scale-in">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold text-slate-800">
-                        {isUphill ? '🧗 Uphill Struggle' : '⛷️ Downhill Execution'}
+                    <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
+                        {isUphill ? 'Uphill' : 'Downhill'} Update
                     </h3>
-                    <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-colors">
-                        <X size={20} />
+                    <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-text-muted)] transition-colors">
+                        <X size={18} />
                     </button>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-5">
                     <div>
-                        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Project Name</label>
+                        <label className="label">Project Name</label>
                         <input
                             type="text"
                             value={projectName}
                             onChange={(e) => setProjectName(e.target.value)}
                             placeholder="e.g. Website Redesign"
-                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-slate-700 placeholder-slate-400 text-sm font-bold"
+                            className="input-field"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Your Name</label>
+                        <label className="label">Your Name</label>
                         <input
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Enter your name"
-                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-slate-700 placeholder-slate-400 text-sm"
+                            className="input-field"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">How are you feeling?</label>
-                        <div className="flex flex-wrap gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <label className="label">How are you feeling?</label>
+                        <div className="flex flex-wrap gap-2 p-3 rounded-xl bg-[var(--color-surface-1)] border border-[var(--color-border-subtle)]">
                             {FEELING_EMOJIS.map((e) => (
                                 <button
                                     key={e}
                                     onClick={() => setEmoji(e)}
-                                    className={`w-10 h-10 flex items-center justify-center text-xl rounded-lg transition-all ${emoji === e ? 'bg-white shadow-md scale-110 ring-2 ring-blue-100' : 'hover:bg-white/50 grayscale hover:grayscale-0'
-                                        }`}
+                                    className={`w-10 h-10 flex items-center justify-center text-xl rounded-lg transition-all ${
+                                        emoji === e
+                                            ? 'bg-[var(--color-surface-3)] ring-2 ring-[var(--color-accent)] scale-110'
+                                            : 'hover:bg-[var(--color-surface-2)] grayscale hover:grayscale-0'
+                                    }`}
                                 >
                                     {e}
                                 </button>
@@ -316,22 +273,22 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
 
                     <div>
                         <div className="flex justify-between items-end mb-2">
-                            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">What's the latest?</label>
+                            <label className="label mb-0">What's the latest?</label>
                             <button
-                                onClick={handleSuggest}
+                                onClick={() => setIsComingSoonOpen(true)}
                                 disabled={!text.trim()}
-                                className="text-xs flex items-center gap-1 text-indigo-600 hover:text-indigo-700 disabled:opacity-50 font-medium transition-colors"
+                                className="text-xs flex items-center gap-1 text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] disabled:opacity-50 font-medium transition-colors"
                             >
                                 <Sparkles size={12} />
-                                Suggest Next Steps
+                                Suggest
                             </button>
                         </div>
                         <textarea
                             autoFocus
                             value={text}
                             onChange={(e) => setText(e.target.value)}
-                            placeholder={isUphill ? "What are the unknowns? What are you figuring out?" : "What tasks are remaining? What's the shipping plan?"}
-                            className="w-full h-32 p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none text-slate-700 placeholder-slate-400 text-sm"
+                            placeholder={isUphill ? "What unknowns are you exploring?" : "What's the shipping plan?"}
+                            className="input-field h-28 resize-none"
                         />
                     </div>
 
@@ -341,107 +298,24 @@ const PinModal = ({ isOpen, onClose, onSubmit, initialX }) => {
                             onSubmit({ text, emoji, name, projectName });
                         }}
                         disabled={!text.trim() || !name.trim() || !projectName.trim()}
-                        className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-2"
+                        className="btn-primary w-full py-3 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <MapPin size={18} />
+                        <MapPin size={16} />
                         Pin Update
                     </button>
                 </div>
+
                 <ComingSoonModal
                     isOpen={isComingSoonOpen}
                     onClose={() => setIsComingSoonOpen(false)}
                     featureName="suggestNextSteps"
                     featureTitle="AI Suggestions Coming Soon"
-                    featureDescription="We're working on AI-powered next step suggestions. This feature will help you figure out what to do next based on your current progress."
+                    featureDescription="We're working on AI-powered suggestions to help you figure out next steps."
                 />
             </div>
         </div>
     );
 };
-
-// --- ReportModal (disabled - re-enable when AI features are ready) ---
-/*
-const ReportModal = ({ isOpen, onClose, pins }) => {
-    const [report, setReport] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-
-    useEffect(() => {
-        if (isOpen) {
-            generateReport();
-        }
-    }, [isOpen]);
-
-    const generateReport = async () => {
-        setIsLoading(true);
-        const uphillPins = pins.filter(p => p.x < 50).map(p => `- ${p.emoji} (At ${Math.round(p.x)}%): ${p.text}`).join('\n');
-        const downhillPins = pins.filter(p => p.x >= 50).map(p => `- ${p.emoji} (At ${Math.round(p.x)}%): ${p.text}`).join('\n');
-
-        const prompt = `
-      You are a project manager assistant. Here is the current status of the project based on a Hill Chart.
-
-      UPHILL WORK (Figuring it out, Risks, Unknowns):
-      ${uphillPins || "No active items."}
-
-      DOWNHILL WORK (Execution, Getting it done):
-      ${downhillPins || "No active items."}
-
-      Please write a concise Project Status Report.
-      1. Start with a 1-sentence "Health Check" summary.
-      2. List "Key Blockers/Risks" derived from the Uphill items.
-      3. List "Shipping Progress" derived from the Downhill items.
-      4. End with an encouraging closing.
-
-      Format nicely with Markdown.
-    `;
-
-        const result = await callGemini(prompt);
-        setReport(result);
-        setIsLoading(false);
-    };
-
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all scale-100 flex flex-col max-h-[90vh] m-4">
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                    <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                        <Sparkles className="text-indigo-500" size={20} />
-                        AI Status Report
-                    </h3>
-                    <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-colors">
-                        <X size={20} />
-                    </button>
-                </div>
-
-                <div className="p-6 overflow-y-auto">
-                    {isLoading ? (
-                        <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                            <Loader2 size={48} className="text-indigo-500 animate-spin" />
-                            <p className="text-slate-500 text-sm animate-pulse">Analyzing project trajectory...</p>
-                        </div>
-                    ) : (
-                        <div className="prose prose-slate prose-sm max-w-none">
-                            <div className="whitespace-pre-wrap font-medium text-slate-700 leading-relaxed">
-                                {report}
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium rounded-lg transition-colors"
-                    >
-                        Close Report
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-};
-*/
 
 const ComingSoonModal = ({ isOpen, onClose, featureName, featureTitle, featureDescription }) => {
     useEffect(() => {
@@ -453,15 +327,12 @@ const ComingSoonModal = ({ isOpen, onClose, featureName, featureTitle, featureDe
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100 p-6 m-4 text-center">
-                <div className="text-6xl mb-4">🚧</div>
-                <h3 className="text-xl font-bold text-slate-800 mb-2">{featureTitle || 'Coming Soon'}</h3>
-                <p className="text-slate-500 mb-6 leading-relaxed">{featureDescription}</p>
-                <button
-                    onClick={onClose}
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-95"
-                >
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+            <div className="glass-card-elevated w-full max-w-sm p-6 m-4 text-center animate-scale-in">
+                <div className="text-5xl mb-4">🚧</div>
+                <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2">{featureTitle || 'Coming Soon'}</h3>
+                <p className="text-sm text-[var(--color-text-secondary)] mb-6 leading-relaxed">{featureDescription}</p>
+                <button onClick={onClose} className="btn-primary px-8">
                     Got it
                 </button>
             </div>
@@ -474,33 +345,22 @@ const HillChartApp = ({ user, onBack }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isReportComingSoonOpen, setIsReportComingSoonOpen] = useState(false);
     const [pendingPinX, setPendingPinX] = useState(null);
-    const [dateFilter, setDateFilter] = useState('all'); // 'all', 'today', 'week', 'sprint'
+    const [dateFilter, setDateFilter] = useState('all');
     const [isExporting, setIsExporting] = useState(false);
-
-    // Storybook Mode State
     const [isStoryMode, setIsStoryMode] = useState(false);
     const [storyDateIndex, setStoryDateIndex] = useState(0);
-
     const chartRef = useRef(null);
 
     useEffect(() => {
         if (!user) return;
-
         const q = query(
             collection(db, 'artifacts', appId, 'public', 'data', 'pins'),
             where('uid', '==', user.uid)
         );
-
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const newPins = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            const newPins = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setPins(newPins);
-        }, (error) => {
-            console.error("Error fetching pins:", error);
-        });
-
+        }, (error) => console.error("Error fetching pins:", error));
         return () => unsubscribe();
     }, [user]);
 
@@ -511,7 +371,6 @@ const HillChartApp = ({ user, onBack }) => {
 
     const handleSavePin = async ({ text, emoji, name, projectName }) => {
         if (!user) return;
-
         try {
             await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'pins'), {
                 x: pendingPinX,
@@ -531,7 +390,7 @@ const HillChartApp = ({ user, onBack }) => {
 
     const handleDeletePin = async (pinId) => {
         if (!user) return;
-        if (confirm('Are you sure you want to remove this update?')) {
+        if (confirm('Remove this update?')) {
             try {
                 await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'pins', pinId));
             } catch (e) {
@@ -540,49 +399,39 @@ const HillChartApp = ({ user, onBack }) => {
         }
     };
 
-    // Filter pins by date range
     const filterPinsByDate = (pins) => {
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
         return pins.filter(pin => {
-            if (!pin.createdAt) return true; // Show pins without date
+            if (!pin.createdAt) return true;
             const pinDate = new Date(pin.createdAt.seconds * 1000);
-
             switch (dateFilter) {
-                case 'today':
-                    return pinDate >= today;
+                case 'today': return pinDate >= today;
                 case 'week': {
                     const weekAgo = new Date(today);
                     weekAgo.setDate(weekAgo.getDate() - 7);
                     return pinDate >= weekAgo;
                 }
                 case 'sprint': {
-                    // Assuming 2-week sprint
                     const sprintStart = new Date(today);
                     sprintStart.setDate(sprintStart.getDate() - 14);
                     return pinDate >= sprintStart;
                 }
-                default:
-                    return true;
+                default: return true;
             }
         });
     };
 
-    // Get unique dates for Storybook Mode
     const uniqueDates = useMemo(() => {
         const dates = new Set();
         pins.forEach(pin => {
             if (pin.createdAt) {
-                const dateStr = new Date(pin.createdAt.seconds * 1000).toLocaleDateString();
-                dates.add(dateStr);
+                dates.add(new Date(pin.createdAt.seconds * 1000).toLocaleDateString());
             }
         });
-        // Sort dates descending (newest first)
         return Array.from(dates).sort((a, b) => new Date(b) - new Date(a));
     }, [pins]);
 
-    // Derived state for displayed pins
     const displayedPins = useMemo(() => {
         if (isStoryMode) {
             if (uniqueDates.length === 0) return [];
@@ -595,72 +444,65 @@ const HillChartApp = ({ user, onBack }) => {
         return filterPinsByDate(pins);
     }, [pins, dateFilter, isStoryMode, storyDateIndex, uniqueDates]);
 
-    const filteredPins = displayedPins; // Alias for compatibility
+    const filteredPins = displayedPins;
 
-    // Export screenshot
     const handleExportScreenshot = async () => {
         if (!chartRef.current) return;
         setIsExporting(true);
-
         try {
             const canvas = await html2canvas(chartRef.current, {
-                backgroundColor: '#f1f5f9',
+                backgroundColor: '#0a0a0b',
                 scale: 2,
                 logging: false,
                 useCORS: true
             });
-
             const link = document.createElement('a');
-            const timestamp = new Date().toISOString().split('T')[0];
-            link.download = `hill-chart-${timestamp}.png`;
+            link.download = `hill-chart-${new Date().toISOString().split('T')[0]}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
         } catch (error) {
-            console.error('Error exporting screenshot:', error);
-            alert('Failed to export screenshot. Please try again.');
+            console.error('Export error:', error);
+            alert('Failed to export screenshot.');
         } finally {
             setIsExporting(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-slate-100 text-slate-800 font-sans p-4 md:p-8">
-            <div className="max-w-5xl mx-auto space-y-8">
-
-                <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <button
-                                onClick={onBack}
-                                className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-500"
-                                title="Back to Launcher"
-                            >
-                                <ArrowLeft size={24} />
-                            </button>
-                            <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="bg-blue-600 text-white p-2 rounded-lg shadow-lg">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M2 20 L12 4 L22 20" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </div>
-                                Project Hill Chart
-                            </h1>
+        <div className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
+            <div className="max-w-5xl mx-auto px-6 py-8">
+                {/* Header */}
+                <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={onBack}
+                            className="p-2 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-text-muted)] transition-colors"
+                        >
+                            <ArrowLeft size={20} />
+                        </button>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-lg shadow-teal-500/20">
+                                <Layers size={20} className="text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-xl font-semibold text-[var(--color-text-primary)]">Hill Chart</h1>
+                                <p className="text-sm text-[var(--color-text-tertiary)]">Track progress visually</p>
+                            </div>
                         </div>
-                        <p className="text-slate-500 ml-14">Track progress from uncertainty to execution.</p>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-3">
                         <button
                             onClick={handleExportScreenshot}
                             disabled={isExporting}
-                            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white text-sm font-bold rounded-full shadow-md hover:shadow-lg transition-all"
+                            className="btn-secondary"
                         >
                             {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                            {isExporting ? 'Exporting...' : 'Export Screenshot'}
+                            Export
                         </button>
                         <button
                             onClick={() => setIsReportComingSoonOpen(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-full shadow-md hover:shadow-lg transition-all"
+                            className="btn-primary"
                         >
                             <Sparkles size={16} />
                             Generate Report
@@ -668,44 +510,41 @@ const HillChartApp = ({ user, onBack }) => {
                     </div>
                 </header>
 
-                {/* Controls: Date Filter OR Storybook Mode */}
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between">
-
+                {/* Controls */}
+                <div className="glass-card p-4 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
-                        {/* Storybook Toggle */}
                         <button
                             onClick={() => {
                                 setIsStoryMode(!isStoryMode);
-                                setStoryDateIndex(0); // Reset to newest date
+                                setStoryDateIndex(0);
                             }}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all ${isStoryMode
-                                ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                                }`}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                                isStoryMode
+                                    ? 'bg-amber-500/20 text-amber-400 ring-1 ring-amber-500/50'
+                                    : 'bg-[var(--color-surface-2)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]'
+                            }`}
                         >
-                            <span className="text-xl">📖</span>
-                            {isStoryMode ? 'Exit Storybook' : 'Storybook Mode'}
+                            <span>📖</span>
+                            {isStoryMode ? 'Exit Storybook' : 'Storybook'}
                         </button>
 
                         {isStoryMode && uniqueDates.length > 0 && (
-                            <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-200">
+                            <div className="flex items-center gap-2 bg-[var(--color-surface-1)] px-3 py-2 rounded-lg border border-[var(--color-border-subtle)]">
                                 <button
                                     onClick={() => setStoryDateIndex(Math.min(uniqueDates.length - 1, storyDateIndex + 1))}
                                     disabled={storyDateIndex >= uniqueDates.length - 1}
-                                    className="p-2 hover:bg-white rounded-md disabled:opacity-30 transition-colors"
-                                    title="Previous Day"
+                                    className="p-1 hover:bg-[var(--color-surface-hover)] rounded disabled:opacity-30 transition-colors"
                                 >
                                     ←
                                 </button>
-                                <div className="px-2 text-center min-w-[120px]">
-                                    <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Viewing</div>
-                                    <div className="font-bold text-slate-700">{uniqueDates[storyDateIndex]}</div>
+                                <div className="px-2 text-center min-w-[100px]">
+                                    <div className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Viewing</div>
+                                    <div className="text-sm font-medium text-[var(--color-text-primary)]">{uniqueDates[storyDateIndex]}</div>
                                 </div>
                                 <button
                                     onClick={() => setStoryDateIndex(Math.max(0, storyDateIndex - 1))}
                                     disabled={storyDateIndex <= 0}
-                                    className="p-2 hover:bg-white rounded-md disabled:opacity-30 transition-colors"
-                                    title="Next Day"
+                                    className="p-1 hover:bg-[var(--color-surface-hover)] rounded disabled:opacity-30 transition-colors"
                                 >
                                     →
                                 </button>
@@ -714,25 +553,23 @@ const HillChartApp = ({ user, onBack }) => {
                     </div>
 
                     {!isStoryMode && (
-                        <div className="flex flex-wrap items-center gap-3">
-                            <div className="flex items-center gap-2 text-slate-600 font-semibold">
-                                <Filter size={18} />
-                                <span className="text-sm">Filter:</span>
-                            </div>
-                            <div className="flex gap-2">
+                        <div className="flex items-center gap-3">
+                            <Filter size={16} className="text-[var(--color-text-muted)]" />
+                            <div className="flex gap-1">
                                 {[
-                                    { value: 'all', label: 'All Time' },
+                                    { value: 'all', label: 'All' },
                                     { value: 'today', label: 'Today' },
-                                    { value: 'week', label: 'Last Week' },
+                                    { value: 'week', label: 'Week' },
                                     { value: 'sprint', label: 'Sprint' }
                                 ].map(filter => (
                                     <button
                                         key={filter.value}
                                         onClick={() => setDateFilter(filter.value)}
-                                        className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${dateFilter === filter.value
-                                            ? 'bg-blue-600 text-white shadow-md'
-                                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                                            }`}
+                                        className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${
+                                            dateFilter === filter.value
+                                                ? 'bg-[var(--color-accent)] text-white'
+                                                : 'bg-[var(--color-surface-2)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]'
+                                        }`}
                                     >
                                         {filter.label}
                                     </button>
@@ -741,107 +578,61 @@ const HillChartApp = ({ user, onBack }) => {
                         </div>
                     )}
 
-                    <div className="text-sm text-slate-500 font-medium">
-                        {isStoryMode
-                            ? `Page ${uniqueDates.length - storyDateIndex} of ${uniqueDates.length}`
-                            : `${filteredPins.length} updates`
-                        }
+                    <div className="text-sm text-[var(--color-text-muted)]">
+                        {filteredPins.length} update{filteredPins.length !== 1 ? 's' : ''}
                     </div>
                 </div>
 
-                {/* Chart Container with Ref for Screenshot */}
-                <div ref={chartRef}>
-                    <main className="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 md:p-10 overflow-visible">
+                {/* Chart */}
+                <div ref={chartRef} className="space-y-6">
+                    <div className="glass-card-elevated p-6 md:p-8">
                         <HillChart
                             pins={filteredPins}
                             onAddPin={handleChartClick}
                             onDeletePin={handleDeletePin}
                         />
-                    </main>
+                    </div>
 
-                    <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Updates Lists */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Uphill */}
                         <div>
-                            <h2 className="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2">
-                                <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+                            <h2 className="text-sm font-semibold text-[var(--color-text-secondary)] mb-4 flex items-center gap-2">
+                                <span className="w-2 h-2 bg-amber-500 rounded-full" />
                                 Uphill (Figuring it out)
                             </h2>
                             <div className="space-y-3">
-                                {filteredPins.filter(p => p.x < 50).length === 0 && (
-                                    <div className="text-slate-400 italic text-sm bg-white p-4 rounded-xl border border-slate-200 border-dashed text-center">No updates in this phase</div>
-                                )}
-                                {filteredPins.filter(p => p.x < 50).map(pin => (
-                                    <div key={pin.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3 transition-hover hover:shadow-md relative group">
-                                        <div className="text-2xl bg-slate-50 p-2 rounded-lg">{pin.emoji}</div>
-                                        <div className="flex-1">
-                                            <p className="text-slate-700 text-sm leading-relaxed mb-2">{pin.text}</p>
-                                            {pin.projectName && (
-                                                <div className="inline-block bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-indigo-100 mb-2">
-                                                    {pin.projectName}
-                                                </div>
-                                            )}
-                                            {pin.name && (
-                                                <p className="text-xs font-semibold text-blue-600 mb-1">👤 {pin.name}</p>
-                                            )}
-                                            <div className="flex items-center gap-3 text-xs text-slate-400">
-                                                <span>Position: {Math.round(pin.x)}%</span>
-                                                {pin.createdAt && (
-                                                    <span>📅 {new Date(pin.createdAt.seconds * 1000).toLocaleDateString()} {new Date(pin.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={() => handleDeletePin(pin.id)}
-                                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-red-100 hover:bg-red-200 p-1.5 rounded-full text-red-600 transition-all"
-                                            title="Delete Update"
-                                        >
-                                            <Trash2 size={14} />
-                                        </button>
+                                {filteredPins.filter(p => p.x < 50).length === 0 ? (
+                                    <div className="text-sm text-[var(--color-text-muted)] italic bg-[var(--color-surface-1)] p-4 rounded-xl border border-dashed border-[var(--color-border-subtle)] text-center">
+                                        No updates
                                     </div>
-                                ))}
+                                ) : (
+                                    filteredPins.filter(p => p.x < 50).map(pin => (
+                                        <PinCard key={pin.id} pin={pin} onDelete={handleDeletePin} />
+                                    ))
+                                )}
                             </div>
                         </div>
 
+                        {/* Downhill */}
                         <div>
-                            <h2 className="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2">
-                                <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                            <h2 className="text-sm font-semibold text-[var(--color-text-secondary)] mb-4 flex items-center gap-2">
+                                <span className="w-2 h-2 bg-emerald-500 rounded-full" />
                                 Downhill (Executing)
                             </h2>
                             <div className="space-y-3">
-                                {filteredPins.filter(p => p.x >= 50).length === 0 && (
-                                    <div className="text-slate-400 italic text-sm bg-white p-4 rounded-xl border border-slate-200 border-dashed text-center">No updates in this phase</div>
-                                )}
-                                {filteredPins.filter(p => p.x >= 50).map(pin => (
-                                    <div key={pin.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3 transition-hover hover:shadow-md relative group">
-                                        <div className="text-2xl bg-slate-50 p-2 rounded-lg">{pin.emoji}</div>
-                                        <div className="flex-1">
-                                            <p className="text-slate-700 text-sm leading-relaxed mb-2">{pin.text}</p>
-                                            {pin.projectName && (
-                                                <div className="inline-block bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-indigo-100 mb-2">
-                                                    {pin.projectName}
-                                                </div>
-                                            )}
-                                            {pin.name && (
-                                                <p className="text-xs font-semibold text-blue-600 mb-1">👤 {pin.name}</p>
-                                            )}
-                                            <div className="flex items-center gap-3 text-xs text-slate-400">
-                                                <span>Position: {Math.round(pin.x)}%</span>
-                                                {pin.createdAt && (
-                                                    <span>📅 {new Date(pin.createdAt.seconds * 1000).toLocaleDateString()} {new Date(pin.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={() => handleDeletePin(pin.id)}
-                                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-red-100 hover:bg-red-200 p-1.5 rounded-full text-red-600 transition-all"
-                                            title="Delete Update"
-                                        >
-                                            <Trash2 size={14} />
-                                        </button>
+                                {filteredPins.filter(p => p.x >= 50).length === 0 ? (
+                                    <div className="text-sm text-[var(--color-text-muted)] italic bg-[var(--color-surface-1)] p-4 rounded-xl border border-dashed border-[var(--color-border-subtle)] text-center">
+                                        No updates
                                     </div>
-                                ))}
+                                ) : (
+                                    filteredPins.filter(p => p.x >= 50).map(pin => (
+                                        <PinCard key={pin.id} pin={pin} onDelete={handleDeletePin} />
+                                    ))
+                                )}
                             </div>
                         </div>
-                    </section>
+                    </div>
                 </div>
 
                 <PinModal
@@ -856,12 +647,42 @@ const HillChartApp = ({ user, onBack }) => {
                     onClose={() => setIsReportComingSoonOpen(false)}
                     featureName="generateReport"
                     featureTitle="AI Reports Coming Soon"
-                    featureDescription="We're working on AI-powered status reports. This feature will automatically generate comprehensive project summaries based on your hill chart progress."
+                    featureDescription="We're building AI-powered status reports that summarize your hill chart progress."
                 />
-
             </div>
         </div>
     );
 };
+
+const PinCard = ({ pin, onDelete }) => (
+    <div className="group relative glass-card p-4 hover:bg-[var(--color-surface-hover)] transition-colors">
+        <div className="flex items-start gap-3">
+            <div className="text-2xl bg-[var(--color-surface-2)] p-2 rounded-lg">{pin.emoji}</div>
+            <div className="flex-1 min-w-0">
+                <p className="text-sm text-[var(--color-text-primary)] leading-relaxed mb-2">{pin.text}</p>
+                {pin.projectName && (
+                    <span className="inline-block px-2 py-0.5 rounded-full bg-[var(--color-accent-subtle)] text-[var(--color-accent)] text-[10px] font-semibold uppercase tracking-wider mb-2">
+                        {pin.projectName}
+                    </span>
+                )}
+                {pin.name && (
+                    <p className="text-xs text-[var(--color-accent)] mb-1">{pin.name}</p>
+                )}
+                <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
+                    <span>{Math.round(pin.x)}%</span>
+                    {pin.createdAt && (
+                        <span>{new Date(pin.createdAt.seconds * 1000).toLocaleDateString()}</span>
+                    )}
+                </div>
+            </div>
+        </div>
+        <button
+            onClick={() => onDelete(pin.id)}
+            className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 p-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/40 text-red-400 transition-all"
+        >
+            <Trash2 size={14} />
+        </button>
+    </div>
+);
 
 export default HillChartApp;

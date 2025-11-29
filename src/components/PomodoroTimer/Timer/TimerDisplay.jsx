@@ -41,7 +41,8 @@ const TimerDisplay = ({ timer, timerMode }) => {
   const duration = timer?.duration || 25 * 60 * 1000;
   const progress = timeRemaining !== null ? (timeRemaining / duration) * 100 : 100;
   const isRunning = timer && !timer.isPaused && timer.endTime;
-  const isWork = timer?.type === 'work';
+  // Default to work/red color when no timer (Ready state), since next action starts a focus session
+  const isWork = !timer || timer.type === 'work';
 
   // SVG circle properties
   const size = 240;
@@ -53,7 +54,7 @@ const TimerDisplay = ({ timer, timerMode }) => {
   return (
     <div className="flex flex-col items-center">
       {/* Timer mode indicator */}
-      <div className="mb-2 text-sm text-slate-500">
+      <div className="mb-2 text-sm text-[var(--color-text-muted)]">
         {timerMode === 'team' ? 'Team Timer' : 'Personal Timer'}
       </div>
 
@@ -66,7 +67,7 @@ const TimerDisplay = ({ timer, timerMode }) => {
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="#e2e8f0"
+            stroke="rgba(255,255,255,0.1)"
             strokeWidth={strokeWidth}
           />
           {/* Progress circle */}
@@ -81,15 +82,16 @@ const TimerDisplay = ({ timer, timerMode }) => {
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
             className={`transition-all duration-200 ${isRunning ? 'opacity-100' : 'opacity-70'}`}
+            style={{ filter: 'drop-shadow(0 0 8px currentColor)' }}
           />
         </svg>
 
         {/* Time display */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-5xl font-bold text-slate-900 font-mono">
+          <span className="text-5xl font-bold text-[var(--color-text-primary)] font-mono">
             {formatTime(timeRemaining ?? duration)}
           </span>
-          <span className={`text-sm font-medium mt-1 ${isWork ? 'text-red-500' : 'text-green-500'}`}>
+          <span className={`text-sm font-medium mt-1 ${isWork ? 'text-red-400' : 'text-green-400'}`}>
             {timer ? (isWork ? 'Focus Session' : 'Break Time') : 'Ready'}
           </span>
         </div>

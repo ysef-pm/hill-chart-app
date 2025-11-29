@@ -62,36 +62,41 @@ const HabitTrackerApp = ({ user, onBack }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-        <div className="text-slate-500">Loading...</div>
+      <div className="min-h-screen bg-[var(--color-bg-primary)] flex items-center justify-center">
+        <div className="text-[var(--color-text-muted)]">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-[var(--color-bg-primary)]">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-4 py-3">
+      <header className="glass-card border-b border-[var(--color-border-subtle)] px-4 py-3">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={onBack}
-              className="p-2 hover:bg-slate-100 rounded-full"
+              className="p-2 hover:bg-[var(--color-surface-2)] rounded-full"
             >
-              <ArrowLeft size={20} className="text-slate-600" />
+              <ArrowLeft size={20} className="text-[var(--color-text-tertiary)]" />
             </button>
-            <div>
-              <h1 className="font-bold text-slate-900">Habit Tracker</h1>
-              {team && (
-                <button
-                  onClick={handleCopyCode}
-                  className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700"
-                >
-                  <span>{team.name}</span>
-                  <span className="font-mono text-xs">({teamId})</span>
-                  {copied ? <Check size={12} /> : <Copy size={12} />}
-                </button>
-              )}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <span className="text-xl">📋</span>
+              </div>
+              <div>
+                <h1 className="font-bold text-[var(--color-text-primary)]">Habit Tracker</h1>
+                {team && (
+                  <button
+                    onClick={handleCopyCode}
+                    className="flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
+                  >
+                    <span>{team.name}</span>
+                    <span className="font-mono text-xs">({teamId})</span>
+                    {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -107,17 +112,17 @@ const HabitTrackerApp = ({ user, onBack }) => {
                     leaveTeam().then(() => console.log('[HabitTrackerApp] leaveTeam completed'));
                   }
                 }}
-                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                className="p-2 text-[var(--color-text-muted)] hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                 title="Leave Team"
               >
                 <LogOut size={20} />
               </button>
 
               {/* View toggle */}
-              <div className="flex bg-slate-100 rounded-lg p-1">
+              <div className="flex bg-[var(--color-surface-1)] rounded-lg p-1 border border-[var(--color-border-subtle)]">
                 <button
                   onClick={() => setShowTeamView(false)}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${!showTeamView ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${!showTeamView ? 'bg-[var(--color-surface-3)] shadow-sm text-[var(--color-text-primary)]' : 'text-[var(--color-text-muted)]'
                     }`}
                 >
                   <User size={16} />
@@ -125,7 +130,7 @@ const HabitTrackerApp = ({ user, onBack }) => {
                 </button>
                 <button
                   onClick={() => setShowTeamView(true)}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${showTeamView ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${showTeamView ? 'bg-[var(--color-surface-3)] shadow-sm text-[var(--color-text-primary)]' : 'text-[var(--color-text-muted)]'
                     }`}
                 >
                   <Users size={16} />
@@ -136,7 +141,7 @@ const HabitTrackerApp = ({ user, onBack }) => {
               {/* Add habit button */}
               <button
                 onClick={() => setShowAddHabit(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg font-medium hover:bg-indigo-600"
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg font-medium hover:bg-indigo-600 shadow-lg shadow-indigo-500/20"
               >
                 <Plus size={18} />
                 Add Habit
@@ -153,13 +158,13 @@ const HabitTrackerApp = ({ user, onBack }) => {
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={() => setWeekOffset((w) => w - 1)}
-              className="p-2 hover:bg-white rounded-lg"
+              className="p-2 hover:bg-[var(--color-surface-2)] rounded-lg border border-[var(--color-border-subtle)]"
             >
-              <ChevronLeft size={20} className="text-slate-600" />
+              <ChevronLeft size={20} className="text-[var(--color-text-secondary)]" />
             </button>
 
             <div className="text-center">
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[var(--color-text-muted)]">
                 {isCurrentWeek ? 'This Week' : `Week of ${weekDates[0]}`}
               </p>
             </div>
@@ -167,18 +172,18 @@ const HabitTrackerApp = ({ user, onBack }) => {
             <button
               onClick={() => setWeekOffset((w) => w + 1)}
               disabled={isCurrentWeek}
-              className="p-2 hover:bg-white rounded-lg disabled:opacity-30"
+              className="p-2 hover:bg-[var(--color-surface-2)] rounded-lg disabled:opacity-30 border border-[var(--color-border-subtle)]"
             >
-              <ChevronRight size={20} className="text-slate-600" />
+              <ChevronRight size={20} className="text-[var(--color-text-secondary)]" />
             </button>
           </div>
 
           {/* Habits table */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="glass-card overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="py-3 px-4 text-left text-sm font-medium text-slate-600 w-1/3">
+                <tr className="bg-[var(--color-surface-1)] border-b border-[var(--color-border-subtle)]">
+                  <th className="py-3 px-4 text-left text-sm font-medium text-[var(--color-text-secondary)] w-1/3">
                     Habit
                   </th>
                   {weekDates.map((date) => {
@@ -189,7 +194,7 @@ const HabitTrackerApp = ({ user, onBack }) => {
                     return (
                       <th
                         key={date}
-                        className={`py-3 px-2 text-center text-sm font-medium w-[60px] ${isToday ? 'text-indigo-600 bg-indigo-50' : 'text-slate-600'
+                        className={`py-3 px-2 text-center text-sm font-medium w-[60px] ${isToday ? 'text-indigo-400 bg-indigo-500/10' : 'text-[var(--color-text-secondary)]'
                           }`}
                       >
                         <div>{day?.short}</div>
@@ -203,7 +208,7 @@ const HabitTrackerApp = ({ user, onBack }) => {
               <tbody>
                 {habits.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-slate-500">
+                    <td colSpan={9} className="py-12 text-center text-[var(--color-text-muted)]">
                       No habits yet. Click "Add Habit" to get started!
                     </td>
                   </tr>
@@ -228,11 +233,11 @@ const HabitTrackerApp = ({ user, onBack }) => {
         </main>
       ) : (
         <div className="flex items-center justify-center h-[calc(100vh-64px)]">
-          <div className="text-center text-slate-500">
+          <div className="text-center text-[var(--color-text-muted)]">
             <p>Create or join a team to start tracking habits</p>
             <button
               onClick={() => setShowTeamSetup(true)}
-              className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-lg font-medium hover:bg-indigo-600"
+              className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-lg font-medium hover:bg-indigo-600 shadow-lg shadow-indigo-500/20"
             >
               Get Started
             </button>

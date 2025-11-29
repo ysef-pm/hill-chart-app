@@ -76,26 +76,28 @@ const KudosBoardApp = ({ user, onBack }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-        <Loader2 size={48} className="text-rose-600 animate-spin" />
+      <div className="min-h-screen bg-[var(--color-bg-primary)] flex items-center justify-center">
+        <Loader2 size={48} className="text-rose-500 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-[var(--color-bg-primary)]">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-4 py-3">
+      <header className="glass-card border-b border-[var(--color-border-subtle)] px-4 py-3">
         <div className="max-w-6xl mx-auto flex items-center gap-4">
           <button
             onClick={handleBack}
-            className="p-2 hover:bg-slate-100 rounded-full"
+            className="p-2 hover:bg-[var(--color-surface-2)] rounded-lg transition-colors"
           >
-            <ArrowLeft size={20} className="text-slate-600" />
+            <ArrowLeft size={20} className="text-[var(--color-text-tertiary)]" />
           </button>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">❤️</span>
-            <span className="font-bold text-slate-900">Kudos Board</span>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center">
+              <span className="text-xl">❤️</span>
+            </div>
+            <span className="font-semibold text-[var(--color-text-primary)]">Kudos Board</span>
           </div>
         </div>
       </header>
@@ -129,7 +131,7 @@ const KudosBoardApp = ({ user, onBack }) => {
             />
           </>
         ) : (
-          <div className="text-center py-16 text-slate-500">
+          <div className="text-center py-16 text-[var(--color-text-muted)]">
             Create or join a team to get started
           </div>
         )}

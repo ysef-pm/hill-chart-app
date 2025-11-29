@@ -58,20 +58,20 @@ const GiveKudosModal = ({ isOpen, onClose, members, currentUserId, onSubmit, loa
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="glass-card-elevated w-full max-w-lg max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white">
-          <h2 className="text-xl font-bold text-slate-900">Give Kudos</h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full">
-            <X size={20} className="text-slate-500" />
+        <div className="flex items-center justify-between p-6 border-b border-[var(--color-border-subtle)] sticky top-0 bg-[var(--color-surface-1)]">
+          <h2 className="text-xl font-bold text-[var(--color-text-primary)]">Give Kudos</h2>
+          <button onClick={onClose} className="p-2 hover:bg-[var(--color-surface-2)] rounded-full">
+            <X size={20} className="text-[var(--color-text-tertiary)]" />
           </button>
         </div>
 
         <div className="p-6 space-y-6">
           {/* Step 1: Select Recipients */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
               Who deserves kudos?
             </label>
             <div className="flex flex-wrap gap-2">
@@ -85,8 +85,8 @@ const GiveKudosModal = ({ isOpen, onClose, members, currentUserId, onSubmit, loa
                     className={`
                       px-3 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5
                       ${isSelected
-                        ? 'bg-rose-100 text-rose-700 border-2 border-rose-300'
-                        : 'bg-slate-100 text-slate-600 border-2 border-transparent hover:bg-slate-200'
+                        ? 'bg-rose-500/20 text-rose-400 border-2 border-rose-500/50'
+                        : 'bg-[var(--color-surface-2)] text-[var(--color-text-secondary)] border-2 border-transparent hover:bg-[var(--color-surface-3)]'
                       }
                     `}
                   >
@@ -100,7 +100,7 @@ const GiveKudosModal = ({ isOpen, onClose, members, currentUserId, onSubmit, loa
                 <button
                   key={name}
                   onClick={() => removeCustomRecipient(name)}
-                  className="px-3 py-1.5 rounded-full text-sm font-medium bg-rose-100 text-rose-700 border-2 border-rose-300 flex items-center gap-1.5"
+                  className="px-3 py-1.5 rounded-full text-sm font-medium bg-rose-500/20 text-rose-400 border-2 border-rose-500/50 flex items-center gap-1.5"
                 >
                   <Check size={14} />
                   {name}
@@ -116,27 +116,27 @@ const GiveKudosModal = ({ isOpen, onClose, members, currentUserId, onSubmit, loa
                     value={customName}
                     onChange={(e) => setCustomName(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && addCustomRecipient()}
-                    className="px-3 py-1.5 border border-slate-300 rounded-full text-sm w-32 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none"
+                    className="px-3 py-1.5 border border-[var(--color-border-default)] bg-[var(--color-surface-1)] rounded-full text-sm w-32 focus:ring-2 focus:ring-rose-500 focus:border-transparent outline-none text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]"
                     autoFocus
                   />
                   <button
                     onClick={addCustomRecipient}
                     disabled={!customName.trim()}
-                    className="p-1.5 bg-rose-600 text-white rounded-full hover:bg-rose-700 disabled:opacity-50"
+                    className="p-1.5 bg-rose-500 text-white rounded-full hover:bg-rose-600 disabled:opacity-50"
                   >
                     <Plus size={14} />
                   </button>
                   <button
                     onClick={() => { setShowCustomInput(false); setCustomName(''); }}
-                    className="p-1.5 hover:bg-slate-100 rounded-full"
+                    className="p-1.5 hover:bg-[var(--color-surface-2)] rounded-full"
                   >
-                    <X size={14} className="text-slate-500" />
+                    <X size={14} className="text-[var(--color-text-muted)]" />
                   </button>
                 </div>
               ) : (
                 <button
                   onClick={() => setShowCustomInput(true)}
-                  className="px-3 py-1.5 rounded-full text-sm font-medium bg-slate-100 text-slate-600 border-2 border-dashed border-slate-300 hover:bg-slate-200 flex items-center gap-1.5"
+                  className="px-3 py-1.5 rounded-full text-sm font-medium bg-[var(--color-surface-2)] text-[var(--color-text-secondary)] border-2 border-dashed border-[var(--color-border-default)] hover:bg-[var(--color-surface-3)] flex items-center gap-1.5"
                 >
                   <Plus size={14} />
                   Someone else...
@@ -147,7 +147,7 @@ const GiveKudosModal = ({ isOpen, onClose, members, currentUserId, onSubmit, loa
 
           {/* Step 2: Pick Category */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
               What kind of kudos?
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -158,13 +158,13 @@ const GiveKudosModal = ({ isOpen, onClose, members, currentUserId, onSubmit, loa
                   className={`
                     p-3 rounded-xl text-left transition-all
                     ${selectedCategory === key
-                      ? `${cat.bgClass} ${cat.borderClass} border-2`
-                      : 'bg-slate-50 border-2 border-transparent hover:bg-slate-100'
+                      ? 'bg-rose-500/10 border-2 border-rose-500/50'
+                      : 'bg-[var(--color-surface-1)] border-2 border-transparent hover:bg-[var(--color-surface-2)]'
                     }
                   `}
                 >
                   <div className="text-xl mb-1">{cat.icon}</div>
-                  <div className={`text-sm font-medium ${selectedCategory === key ? cat.textClass : 'text-slate-700'}`}>
+                  <div className={`text-sm font-medium ${selectedCategory === key ? 'text-rose-400' : 'text-[var(--color-text-secondary)]'}`}>
                     {cat.label}
                   </div>
                 </button>
@@ -174,7 +174,7 @@ const GiveKudosModal = ({ isOpen, onClose, members, currentUserId, onSubmit, loa
 
           {/* Step 3: Write Message */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
               Your message
             </label>
             <textarea
@@ -182,9 +182,9 @@ const GiveKudosModal = ({ isOpen, onClose, members, currentUserId, onSubmit, loa
               onChange={(e) => setMessage(e.target.value.slice(0, MESSAGE_MAX_LENGTH))}
               placeholder="Tell them why they're awesome..."
               rows={4}
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none resize-none"
+              className="w-full px-4 py-3 border border-[var(--color-border-default)] bg-[var(--color-surface-1)] rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent outline-none resize-none text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]"
             />
-            <div className="flex justify-between text-xs text-slate-500 mt-1">
+            <div className="flex justify-between text-xs text-[var(--color-text-muted)] mt-1">
               <span>{message.length < MESSAGE_MIN_LENGTH ? `At least ${MESSAGE_MIN_LENGTH} characters` : ''}</span>
               <span>{message.length}/{MESSAGE_MAX_LENGTH}</span>
             </div>
@@ -192,18 +192,18 @@ const GiveKudosModal = ({ isOpen, onClose, members, currentUserId, onSubmit, loa
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-slate-200 sticky bottom-0 bg-white">
+        <div className="p-6 border-t border-[var(--color-border-subtle)] sticky bottom-0 bg-[var(--color-surface-1)]">
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-3 border border-slate-300 rounded-lg hover:bg-slate-50 font-medium"
+              className="flex-1 px-4 py-3 border border-[var(--color-border-default)] text-[var(--color-text-secondary)] rounded-lg hover:bg-[var(--color-surface-2)] font-medium"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
               disabled={!isValid || loading}
-              className="flex-1 px-4 py-3 bg-rose-600 text-white rounded-lg hover:bg-rose-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-3 bg-rose-500 text-white rounded-lg hover:bg-rose-600 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-rose-500/20"
             >
               {loading && <Loader2 size={18} className="animate-spin" />}
               Send Kudos

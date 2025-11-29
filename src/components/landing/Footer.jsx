@@ -1,52 +1,115 @@
 import React from 'react';
-import { LayoutGrid } from 'lucide-react';
+import { Layers } from 'lucide-react';
 
 export default function Footer() {
     return (
-        <footer className="bg-slate-900 text-slate-300 py-16">
-            <div className="max-w-7xl mx-auto px-6">
-                <div className="grid md:grid-cols-4 gap-12 mb-12">
-                    <div className="col-span-1 md:col-span-1">
-                        <div className="flex items-center gap-2 mb-6 text-white">
-                            <LayoutGrid size={24} />
-                            <span className="font-bold text-xl">Dev Com Tools</span>
+        <footer className="relative bg-[var(--color-bg-primary)] border-t border-[var(--color-border-subtle)]">
+            <div className="max-w-6xl mx-auto px-6 py-16">
+                <div className="grid md:grid-cols-5 gap-12 mb-12">
+                    {/* Brand */}
+                    <div className="md:col-span-2">
+                        <div className="flex items-center gap-2.5 mb-5">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center">
+                                <Layers size={16} className="text-white" strokeWidth={2.5} />
+                            </div>
+                            <span className="font-semibold text-[var(--color-text-primary)]">DevCom</span>
                         </div>
-                        <p className="text-slate-500 text-sm leading-relaxed">
+                        <p className="text-sm text-[var(--color-text-tertiary)] leading-relaxed max-w-xs">
                             Helping product managers and development teams communicate better, one tool at a time.
                         </p>
                     </div>
 
+                    {/* Tools */}
                     <div>
-                        <h4 className="text-white font-semibold mb-4">Tools</h4>
-                        <ul className="space-y-3 text-sm">
-                            <li><a href="#" className="hover:text-white transition-colors">Hill Chart</a></li>
-                            <li><a href="#" className="hover:text-white transition-colors">Feelings Wheel</a></li>
-                            <li><a href="#" className="hover:text-white transition-colors">Retro Board</a></li>
-                            <li><a href="#" className="hover:text-white transition-colors">Habit Tracker</a></li>
+                        <h4 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-4">
+                            Tools
+                        </h4>
+                        <ul className="space-y-3">
+                            <li>
+                                <a href="#" className="text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors">
+                                    Hill Chart
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" className="text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors">
+                                    Feelings Wheel
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" className="text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors">
+                                    Retro Board
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" className="text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors">
+                                    Habit Tracker
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" className="text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors">
+                                    Focus Timer
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" className="text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors">
+                                    Kudos Board
+                                </a>
+                            </li>
                         </ul>
                     </div>
 
+                    {/* Resources */}
                     <div>
-                        <h4 className="text-white font-semibold mb-4">Resources</h4>
-                        <ul className="space-y-3 text-sm">
-                            <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-                            <li><a href="#" className="hover:text-white transition-colors">Best Practices</a></li>
-                            <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
+                        <h4 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-4">
+                            Resources
+                        </h4>
+                        <ul className="space-y-3">
+                            <li>
+                                <a href="#" className="text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors">
+                                    Documentation
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" className="text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors">
+                                    Best Practices
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" className="text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors">
+                                    Help Center
+                                </a>
+                            </li>
                         </ul>
                     </div>
 
+                    {/* Legal */}
                     <div>
-                        <h4 className="text-white font-semibold mb-4">Legal</h4>
-                        <ul className="space-y-3 text-sm">
-                            <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                            <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
+                        <h4 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-4">
+                            Legal
+                        </h4>
+                        <ul className="space-y-3">
+                            <li>
+                                <a href="#" className="text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors">
+                                    Privacy Policy
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" className="text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors">
+                                    Terms of Service
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
 
-                <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
-                    <p>© 2024 Dev Com Tools. All rights reserved.</p>
-                    <p>Made with 💙 for PMs everywhere.</p>
+                {/* Bottom Bar */}
+                <div className="pt-8 border-t border-[var(--color-border-subtle)] flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p className="text-sm text-[var(--color-text-muted)]">
+                        © 2024 DevCom. All rights reserved.
+                    </p>
+                    <p className="text-sm text-[var(--color-text-muted)]">
+                        Built for product teams everywhere
+                    </p>
                 </div>
             </div>
         </footer>

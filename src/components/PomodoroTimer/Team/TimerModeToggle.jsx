@@ -19,43 +19,43 @@ const TimerModeToggle = ({ mode, onToggle, disabled }) => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
-        className="flex items-center gap-2 px-3 py-1.5 bg-slate-100
-                   hover:bg-slate-200 rounded-lg transition-colors disabled:opacity-50"
+        className="flex items-center gap-2 px-3 py-1.5 bg-[var(--color-surface-2)]
+                   hover:bg-[var(--color-surface-3)] rounded-lg transition-colors disabled:opacity-50 border border-[var(--color-border-subtle)]"
       >
         {mode === TIMER_MODES.TEAM ? (
           <>
-            <Users size={16} className="text-emerald-600" />
-            <span className="text-sm font-medium">Team Timer</span>
+            <Users size={16} className="text-emerald-400" />
+            <span className="text-sm font-medium text-[var(--color-text-primary)]">Team Timer</span>
           </>
         ) : (
           <>
-            <User size={16} className="text-sky-600" />
-            <span className="text-sm font-medium">Individual</span>
+            <User size={16} className="text-sky-400" />
+            <span className="text-sm font-medium text-[var(--color-text-primary)]">Individual</span>
           </>
         )}
-        <ChevronDown size={14} className="text-slate-400" />
+        <ChevronDown size={14} className="text-[var(--color-text-muted)]" />
       </button>
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden z-20">
+        <div className="absolute top-full left-0 mt-1 glass-card-elevated rounded-lg overflow-hidden z-20">
           <button
             onClick={() => handleSelect(TIMER_MODES.TEAM)}
-            className={`w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-slate-50 ${
-              mode === TIMER_MODES.TEAM ? 'bg-slate-50' : ''
+            className={`w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-[var(--color-surface-2)] transition-colors ${
+              mode === TIMER_MODES.TEAM ? 'bg-[var(--color-surface-2)]' : ''
             }`}
           >
-            <Users size={16} className="text-emerald-600" />
-            <span className="text-sm">Team Timer</span>
+            <Users size={16} className="text-emerald-400" />
+            <span className="text-sm text-[var(--color-text-primary)]">Team Timer</span>
           </button>
           <button
             onClick={() => handleSelect(TIMER_MODES.INDIVIDUAL)}
-            className={`w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-slate-50 ${
-              mode === TIMER_MODES.INDIVIDUAL ? 'bg-slate-50' : ''
+            className={`w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-[var(--color-surface-2)] transition-colors ${
+              mode === TIMER_MODES.INDIVIDUAL ? 'bg-[var(--color-surface-2)]' : ''
             }`}
           >
-            <User size={16} className="text-sky-600" />
-            <span className="text-sm">Individual</span>
+            <User size={16} className="text-sky-400" />
+            <span className="text-sm text-[var(--color-text-primary)]">Individual</span>
           </button>
         </div>
       )}

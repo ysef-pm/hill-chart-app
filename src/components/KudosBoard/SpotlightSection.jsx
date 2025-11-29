@@ -58,9 +58,9 @@ const SpotlightSection = ({ celebrations, currentUserId, members, onReact }) => 
 
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
-        <Sparkles size={20} className="text-amber-500" />
-        <h2 className="text-lg font-bold text-slate-900">Spotlight</h2>
-        <span className="text-sm text-slate-500">({celebrations.length} active)</span>
+        <Sparkles size={20} className="text-amber-400" />
+        <h2 className="text-lg font-bold text-[var(--color-text-primary)]">Spotlight</h2>
+        <span className="text-sm text-[var(--color-text-muted)]">({celebrations.length} active)</span>
       </div>
 
       {/* Carousel */}
@@ -68,7 +68,7 @@ const SpotlightSection = ({ celebrations, currentUserId, members, onReact }) => 
         {canScrollLeft && (
           <button
             onClick={() => setScrollIndex((i) => i - 1)}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-slate-50"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-8 h-8 bg-[var(--color-surface-2)] rounded-full shadow-md flex items-center justify-center hover:bg-[var(--color-surface-3)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)]"
           >
             <ChevronLeft size={18} />
           </button>
@@ -95,7 +95,7 @@ const SpotlightSection = ({ celebrations, currentUserId, members, onReact }) => 
         {canScrollRight && (
           <button
             onClick={() => setScrollIndex((i) => i + 1)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-slate-50"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-8 h-8 bg-[var(--color-surface-2)] rounded-full shadow-md flex items-center justify-center hover:bg-[var(--color-surface-3)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)]"
           >
             <ChevronRight size={18} />
           </button>

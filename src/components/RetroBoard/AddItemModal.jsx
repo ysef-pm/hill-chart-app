@@ -27,16 +27,16 @@ const AddItemModal = ({ isOpen, onClose, onAdd, section, participants, currentUs
     .map(([id, p]) => ({ id, name: p.name }));
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="glass-card-elevated max-w-md w-full overflow-hidden">
         {/* Header */}
-        <div className={`flex items-center justify-between p-4 ${section.bgColor}`}>
+        <div className={`flex items-center justify-between p-4 ${section.headerBg} border-b border-[var(--color-border-subtle)]`}>
           <div className="flex items-center gap-2">
             <span className="text-2xl">{section.icon}</span>
-            <h2 className={`text-lg font-bold ${section.textColor}`}>{section.title}</h2>
+            <h2 className={`text-lg font-semibold ${section.textColor}`}>{section.title}</h2>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/50 rounded-full">
-            <X size={20} className="text-slate-600" />
+          <button onClick={onClose} className="p-2 hover:bg-[var(--color-surface-2)] rounded-lg transition-colors">
+            <X size={20} className="text-[var(--color-text-tertiary)]" />
           </button>
         </div>
 
@@ -44,7 +44,7 @@ const AddItemModal = ({ isOpen, onClose, onAdd, section, participants, currentUs
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {section.hasShoutout && (
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">
                 Who are you shouting out?
               </label>
               <select
@@ -59,13 +59,13 @@ const AddItemModal = ({ isOpen, onClose, onAdd, section, participants, currentUs
                     setShoutoutTo(value);
                   }
                 }}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                className="w-full px-4 py-2 bg-[var(--color-surface-1)] border border-[var(--color-border-default)] rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-[var(--color-text-primary)]"
               >
-                <option value="">Select a teammate...</option>
+                <option value="" className="bg-[var(--color-surface-1)]">Select a teammate...</option>
                 {otherParticipants.map((p) => (
-                  <option key={p.id} value={p.name}>{p.name}</option>
+                  <option key={p.id} value={p.name} className="bg-[var(--color-surface-1)]">{p.name}</option>
                 ))}
-                <option value="__custom__">Someone else...</option>
+                <option value="__custom__" className="bg-[var(--color-surface-1)]">Someone else...</option>
               </select>
               {isCustomShoutout && (
                 <input
@@ -73,14 +73,14 @@ const AddItemModal = ({ isOpen, onClose, onAdd, section, participants, currentUs
                   placeholder="Enter their name"
                   value={shoutoutTo}
                   onChange={(e) => setShoutoutTo(e.target.value)}
-                  className="w-full mt-2 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                  className="w-full mt-2 px-4 py-2 bg-[var(--color-surface-1)] border border-[var(--color-border-default)] rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]"
                 />
               )}
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">
               {section.hasShoutout ? 'What did they do?' : section.subtitle}
             </label>
             <textarea
@@ -92,7 +92,7 @@ const AddItemModal = ({ isOpen, onClose, onAdd, section, participants, currentUs
                   : `Add your ${section.title.toLowerCase()}...`
               }
               rows={3}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 resize-none"
+              className="w-full px-4 py-2 bg-[var(--color-surface-1)] border border-[var(--color-border-default)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent resize-none text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]"
             />
           </div>
 
@@ -100,14 +100,14 @@ const AddItemModal = ({ isOpen, onClose, onAdd, section, participants, currentUs
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
+              className="flex-1 px-4 py-2 border border-[var(--color-border-default)] text-[var(--color-text-secondary)] rounded-lg hover:bg-[var(--color-surface-2)] transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!text.trim() || (section.hasShoutout && !shoutoutTo)}
-              className={`flex-1 px-4 py-2 text-white rounded-lg font-medium disabled:opacity-50 bg-slate-800 hover:bg-slate-900`}
+              className="flex-1 px-4 py-2 text-white rounded-lg font-medium disabled:opacity-50 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] transition-colors"
             >
               Add Item
             </button>

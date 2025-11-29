@@ -38,23 +38,23 @@ const AddCelebrationModal = ({ isOpen, onClose, members, onSubmit, loading }) =>
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="glass-card-elevated w-full max-w-lg max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-200 sticky top-0 bg-white">
+        <div className="flex items-center justify-between p-6 border-b border-[var(--color-border-subtle)] sticky top-0 bg-[var(--color-surface-1)]">
           <div className="flex items-center gap-2">
-            <Sparkles size={24} className="text-amber-500" />
-            <h2 className="text-xl font-bold text-slate-900">Add Celebration</h2>
+            <Sparkles size={24} className="text-amber-400" />
+            <h2 className="text-xl font-bold text-[var(--color-text-primary)]">Add Celebration</h2>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full">
-            <X size={20} className="text-slate-500" />
+          <button onClick={onClose} className="p-2 hover:bg-[var(--color-surface-2)] rounded-full">
+            <X size={20} className="text-[var(--color-text-tertiary)]" />
           </button>
         </div>
 
         <div className="p-6 space-y-6">
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
               Celebration Title
             </label>
             <input
@@ -62,16 +62,16 @@ const AddCelebrationModal = ({ isOpen, onClose, members, onSubmit, loading }) =>
               value={title}
               onChange={(e) => setTitle(e.target.value.slice(0, TITLE_MAX_LENGTH))}
               placeholder='e.g., "v2.0 Launch! 🎉"'
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+              className="w-full px-4 py-3 border border-[var(--color-border-default)] bg-[var(--color-surface-1)] rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]"
             />
-            <div className="text-xs text-slate-500 text-right mt-1">
+            <div className="text-xs text-[var(--color-text-muted)] text-right mt-1">
               {title.length}/{TITLE_MAX_LENGTH}
             </div>
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
               Description
             </label>
             <textarea
@@ -79,16 +79,16 @@ const AddCelebrationModal = ({ isOpen, onClose, members, onSubmit, loading }) =>
               onChange={(e) => setMessage(e.target.value.slice(0, MESSAGE_MAX_LENGTH))}
               placeholder="Tell everyone about this win..."
               rows={4}
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none resize-none"
+              className="w-full px-4 py-3 border border-[var(--color-border-default)] bg-[var(--color-surface-1)] rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none resize-none text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]"
             />
-            <div className="text-xs text-slate-500 text-right mt-1">
+            <div className="text-xs text-[var(--color-text-muted)] text-right mt-1">
               {message.length}/{MESSAGE_MAX_LENGTH}
             </div>
           </div>
 
           {/* Tag People (Optional) */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
               Tag people (optional)
             </label>
             <div className="flex flex-wrap gap-2">
@@ -101,8 +101,8 @@ const AddCelebrationModal = ({ isOpen, onClose, members, onSubmit, loading }) =>
                     className={`
                       px-3 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5
                       ${isTagged
-                        ? 'bg-amber-100 text-amber-700 border-2 border-amber-300'
-                        : 'bg-slate-100 text-slate-600 border-2 border-transparent hover:bg-slate-200'
+                        ? 'bg-amber-500/20 text-amber-400 border-2 border-amber-500/50'
+                        : 'bg-[var(--color-surface-2)] text-[var(--color-text-secondary)] border-2 border-transparent hover:bg-[var(--color-surface-3)]'
                       }
                     `}
                   >
@@ -116,18 +116,18 @@ const AddCelebrationModal = ({ isOpen, onClose, members, onSubmit, loading }) =>
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-slate-200 sticky bottom-0 bg-white">
+        <div className="p-6 border-t border-[var(--color-border-subtle)] sticky bottom-0 bg-[var(--color-surface-1)]">
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-3 border border-slate-300 rounded-lg hover:bg-slate-50 font-medium"
+              className="flex-1 px-4 py-3 border border-[var(--color-border-default)] text-[var(--color-text-secondary)] rounded-lg hover:bg-[var(--color-surface-2)] font-medium"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
               disabled={!isValid || loading}
-              className="flex-1 px-4 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
             >
               {loading && <Loader2 size={18} className="animate-spin" />}
               Celebrate!

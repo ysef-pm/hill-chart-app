@@ -17,12 +17,12 @@ const RoomInfoBar = ({ roomCode, participants }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+    <div className="glass-card p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wider">Room</p>
-            <p className="font-mono font-bold text-slate-900">{roomCode}</p>
+            <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">Room</p>
+            <p className="font-mono font-bold text-[var(--color-text-primary)]">{roomCode}</p>
           </div>
 
           <div className="flex -space-x-2">
@@ -38,7 +38,7 @@ const RoomInfoBar = ({ roomCode, participants }) => {
               />
             ))}
             {participantList.length > 5 && (
-              <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-medium text-slate-600">
+              <div className="w-8 h-8 rounded-full bg-[var(--color-surface-3)] flex items-center justify-center text-xs font-medium text-[var(--color-text-secondary)] border-2 border-[var(--color-bg-primary)]">
                 +{participantList.length - 5}
               </div>
             )}
@@ -46,15 +46,15 @@ const RoomInfoBar = ({ roomCode, participants }) => {
         </div>
 
         <div className="flex items-center gap-4">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-[var(--color-text-tertiary)]">
             {pinsPlaced}/{participantList.length} pins placed
           </p>
 
           <button
             onClick={handleCopy}
-            className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-medium rounded-lg transition-colors"
+            className="flex items-center gap-2 px-3 py-2 bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] text-[var(--color-text-secondary)] text-sm font-medium rounded-lg transition-colors border border-[var(--color-border-subtle)]"
           >
-            {copied ? <Check size={16} /> : <Copy size={16} />}
+            {copied ? <Check size={16} className="text-[var(--color-accent)]" /> : <Copy size={16} />}
             {copied ? 'Copied!' : 'Copy Code'}
           </button>
         </div>

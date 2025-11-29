@@ -105,26 +105,26 @@ const FeelingsWheelApp = ({ user, onBack }) => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-[var(--color-bg-primary)]">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4">
+      <header className="glass-card border-b border-[var(--color-border-subtle)] px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={handleBack}
-              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              className="p-2 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-2)] rounded-lg transition-colors"
             >
               <ArrowLeft size={20} />
             </button>
             <div>
-              <h1 className="text-xl font-bold text-slate-900">Feelings Wheel</h1>
-              <p className="text-sm text-slate-500">Place your pin to share how you're feeling</p>
+              <h1 className="text-xl font-semibold text-[var(--color-text-primary)]">Feelings Wheel</h1>
+              <p className="text-sm text-[var(--color-text-secondary)]">Place your pin to share how you're feeling</p>
             </div>
           </div>
 
           <button
             onClick={() => setShowParticipants(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] text-[var(--color-text-secondary)] font-medium rounded-xl transition-colors border border-[var(--color-border-subtle)]"
           >
             <Users size={18} />
             {participantCount} Participant{participantCount !== 1 ? 's' : ''}
@@ -135,7 +135,7 @@ const FeelingsWheelApp = ({ user, onBack }) => {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto p-6 space-y-6">
         {/* Wheel */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+        <div className="glass-card p-8">
           <Wheel
             onSelectFeeling={handleSelectFeeling}
             disabled={!!currentUser?.feeling}
@@ -158,7 +158,7 @@ const FeelingsWheelApp = ({ user, onBack }) => {
                 <button
                   onClick={revealAll}
                   disabled={!Object.values(participants).some(p => p.feeling)}
-                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors"
+                  className="flex items-center gap-2 px-6 py-3 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] disabled:bg-[var(--color-surface-2)] disabled:text-[var(--color-text-muted)] disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors"
                 >
                   <Eye size={20} />
                   Reveal All Feelings
@@ -167,21 +167,21 @@ const FeelingsWheelApp = ({ user, onBack }) => {
                 <div className="flex flex-wrap justify-center gap-3">
                   <button
                     onClick={hideAll}
-                    className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] text-[var(--color-text-secondary)] font-medium rounded-xl transition-colors border border-[var(--color-border-subtle)]"
                   >
                     <EyeOff size={18} />
                     Hide All
                   </button>
                   <button
                     onClick={() => setShowTable(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] text-[var(--color-text-secondary)] font-medium rounded-xl transition-colors border border-[var(--color-border-subtle)]"
                   >
                     <Table size={18} />
                     Show Table
                   </button>
                   <button
                     onClick={resetAll}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-xl transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium rounded-xl transition-colors border border-red-500/20"
                   >
                     <RotateCcw size={18} />
                     Reset All
@@ -190,7 +190,7 @@ const FeelingsWheelApp = ({ user, onBack }) => {
               )}
             </>
           ) : (
-            <p className="text-slate-500 text-sm">
+            <p className="text-[var(--color-text-tertiary)] text-sm">
               {isRevealed ? 'Feelings have been revealed!' : 'Waiting for host to reveal feelings...'}
             </p>
           )}
@@ -204,7 +204,7 @@ const FeelingsWheelApp = ({ user, onBack }) => {
         />
 
         {error && (
-          <p className="text-center text-red-500 text-sm">{error}</p>
+          <p className="text-center text-red-400 text-sm">{error}</p>
         )}
       </main>
 

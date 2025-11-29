@@ -144,30 +144,32 @@ const PomodoroApp = ({ user, onBack }) => {
   const isTimerRunning = currentTimer && !currentTimer.isPaused && currentTimer.endTime;
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-[var(--color-bg-primary)]">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-4 py-3">
+      <header className="glass-card border-b border-[var(--color-border-subtle)] px-4 py-3">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={handleBack}
-              className="p-2 hover:bg-slate-100 rounded-full"
+              className="p-2 hover:bg-[var(--color-surface-2)] rounded-lg transition-colors"
             >
-              <ArrowLeft size={20} className="text-slate-600" />
+              <ArrowLeft size={20} className="text-[var(--color-text-tertiary)]" />
             </button>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">🍅</span>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
+                <span className="text-xl">🍅</span>
+              </div>
               <div>
-                <h1 className="font-bold text-slate-900">
+                <h1 className="font-semibold text-[var(--color-text-primary)]">
                   {room?.name || 'Tomato Task Garden'}
                 </h1>
                 {roomCode && (
                   <button
                     onClick={handleCopyCode}
-                    className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700"
+                    className="flex items-center gap-1 text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] transition-colors"
                   >
                     <span className="font-mono">{roomCode}</span>
-                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                    {copied ? <Check size={14} className="text-[var(--color-accent)]" /> : <Copy size={14} />}
                   </button>
                 )}
               </div>
@@ -194,7 +196,7 @@ const PomodoroApp = ({ user, onBack }) => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left column - Timer */}
             <div className="space-y-4">
-              <div className="bg-white rounded-xl p-6 border border-slate-200">
+              <div className="glass-card p-6">
                 <TimerDisplay
                   timer={currentTimer}
                   timerMode={room?.timerMode}
@@ -233,7 +235,7 @@ const PomodoroApp = ({ user, onBack }) => {
                 </div>
 
                 {/* Pomodoro counter */}
-                <div className="mt-4 text-center text-sm text-slate-500">
+                <div className="mt-4 text-center text-sm text-[var(--color-text-muted)]">
                   <span className="text-lg">🍅</span> {currentUser?.stats?.pomodorosToday || 0} pomodoros today
                 </div>
               </div>
@@ -241,7 +243,7 @@ const PomodoroApp = ({ user, onBack }) => {
 
             {/* Right column - Tasks & Garden */}
             <div className="space-y-4">
-              <div className="bg-white rounded-xl p-6 border border-slate-200">
+              <div className="glass-card p-6">
                 <TaskList
                   tasks={tasks}
                   onAdd={addTask}
@@ -256,7 +258,7 @@ const PomodoroApp = ({ user, onBack }) => {
         </main>
       ) : (
         <div className="flex items-center justify-center h-[calc(100vh-64px)]">
-          <div className="text-center text-slate-500">
+          <div className="text-center text-[var(--color-text-muted)]">
             <span className="text-4xl">🍅</span>
             <p className="mt-2">Create or join a room to get started</p>
           </div>

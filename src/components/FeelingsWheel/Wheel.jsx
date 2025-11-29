@@ -200,7 +200,7 @@ const Wheel = ({ onSelectFeeling, disabled = false, isRevealed = false, particip
             key={`${segment.type}-${segment.emotion}-${i}`}
             d={segment.path}
             fill={segment.color}
-            stroke="white"
+            stroke="rgba(10, 10, 11, 0.5)"
             strokeWidth="2"
             className={`transition-all duration-200 ${
               disabled || isRevealed ? 'cursor-default' : 'cursor-pointer hover:opacity-80'
@@ -233,7 +233,7 @@ const Wheel = ({ onSelectFeeling, disabled = false, isRevealed = false, particip
                     cy={y}
                     r="16"
                     fill={p.avatarColor}
-                    stroke="white"
+                    stroke="rgba(10, 10, 11, 0.8)"
                     strokeWidth="2"
                     className="drop-shadow-md"
                   />
@@ -274,13 +274,22 @@ const Wheel = ({ onSelectFeeling, disabled = false, isRevealed = false, particip
           </g>
         ))}
 
-        {/* Center label */}
+        {/* Center circle with label */}
+        <circle
+          cx={centerX}
+          cy={centerY}
+          r="55"
+          fill="rgba(10, 10, 11, 0.9)"
+          stroke="rgba(255, 255, 255, 0.1)"
+          strokeWidth="1"
+        />
         <text
           x={centerX}
           y={centerY}
           textAnchor="middle"
           dominantBaseline="middle"
-          className="text-sm font-medium fill-slate-600 pointer-events-none"
+          className="text-sm font-medium pointer-events-none"
+          fill="rgba(255, 255, 255, 0.7)"
         >
           {isRevealed ? 'Team Feelings' : (hoveredSegment ? hoveredSegment.split('-')[1] : 'How are you feeling?')}
         </text>
@@ -288,11 +297,11 @@ const Wheel = ({ onSelectFeeling, disabled = false, isRevealed = false, particip
 
       {/* Breadcrumb - only show when not revealed */}
       {!isRevealed && (selectedPrimary || selectedSecondary) && (
-        <div className="text-center mt-4 text-sm text-slate-600">
-          {selectedPrimary && <span className="font-medium">{selectedPrimary}</span>}
-          {selectedSecondary && <span> → <span className="font-medium">{selectedSecondary}</span></span>}
-          {selectedSecondary && <span className="text-slate-400"> → Select tertiary</span>}
-          {selectedPrimary && !selectedSecondary && <span className="text-slate-400"> → Select secondary</span>}
+        <div className="text-center mt-4 text-sm text-[var(--color-text-secondary)]">
+          {selectedPrimary && <span className="font-medium text-[var(--color-text-primary)]">{selectedPrimary}</span>}
+          {selectedSecondary && <span> → <span className="font-medium text-[var(--color-text-primary)]">{selectedSecondary}</span></span>}
+          {selectedSecondary && <span className="text-[var(--color-text-muted)]"> → Select tertiary</span>}
+          {selectedPrimary && !selectedSecondary && <span className="text-[var(--color-text-muted)]"> → Select secondary</span>}
         </div>
       )}
     </div>

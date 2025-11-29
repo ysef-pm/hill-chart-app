@@ -21,7 +21,7 @@ const TimerControls = ({
 
   if (!canControl) {
     return (
-      <div className="text-center text-slate-500 text-sm py-4">
+      <div className="text-center text-[var(--color-text-muted)] text-sm py-4">
         Waiting for host to control the timer...
       </div>
     );
@@ -34,7 +34,7 @@ const TimerControls = ({
         <button
           onClick={() => onStart('work')}
           disabled={disabled}
-          className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium disabled:opacity-50 transition-colors"
+          className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium disabled:opacity-50 transition-colors shadow-lg shadow-red-500/20"
         >
           <Play size={20} />
           Start Focus
@@ -43,7 +43,7 @@ const TimerControls = ({
         <button
           onClick={onResume}
           disabled={disabled}
-          className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium disabled:opacity-50 transition-colors"
+          className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium disabled:opacity-50 transition-colors shadow-lg shadow-red-500/20"
         >
           <Play size={20} />
           Resume
@@ -52,7 +52,7 @@ const TimerControls = ({
         <button
           onClick={onPause}
           disabled={disabled}
-          className="flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-medium disabled:opacity-50 transition-colors"
+          className="flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-medium disabled:opacity-50 transition-colors shadow-lg shadow-amber-500/20"
         >
           <Pause size={20} />
           Pause
@@ -64,7 +64,7 @@ const TimerControls = ({
         <button
           onClick={() => onStartBreak()}
           disabled={disabled}
-          className="flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium disabled:opacity-50 transition-colors"
+          className="flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium disabled:opacity-50 transition-colors shadow-lg shadow-green-500/20"
         >
           <Coffee size={20} />
           Start Break
@@ -76,7 +76,7 @@ const TimerControls = ({
         <button
           onClick={onReset}
           disabled={disabled}
-          className="flex items-center gap-2 px-4 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-medium disabled:opacity-50 transition-colors"
+          className="flex items-center gap-2 px-4 py-3 bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] text-[var(--color-text-secondary)] rounded-xl font-medium disabled:opacity-50 transition-colors border border-[var(--color-border-subtle)]"
         >
           <RotateCcw size={20} />
         </button>

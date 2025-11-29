@@ -23,19 +23,19 @@ const TomatoGarden = ({ tasks, garden }) => {
   }, [completedTasks.length]);
 
   return (
-    <div className="bg-amber-50 rounded-xl p-4 border-2 border-amber-200">
+    <div className="glass-card bg-amber-500/5 border border-amber-500/30 p-4">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <span className="text-2xl">🍅</span>
-        <h3 className="font-bold text-amber-800">Harvest Garden</h3>
-        <span className="ml-auto text-sm text-amber-600">
+        <h3 className="font-semibold text-amber-400">Harvest Garden</h3>
+        <span className="ml-auto text-sm text-amber-500/70">
           {garden.totalPomodoros} pomodoros
         </span>
       </div>
 
       {/* Garden plot */}
       {completedTasks.length === 0 ? (
-        <p className="text-amber-600 text-sm text-center py-4">
+        <p className="text-amber-500/70 text-sm text-center py-4">
           Complete tasks to grow your garden!
         </p>
       ) : (
@@ -47,7 +47,7 @@ const TomatoGarden = ({ tasks, garden }) => {
       )}
 
       {/* Stats */}
-      <div className="mt-3 pt-3 border-t border-amber-200 text-xs text-amber-600">
+      <div className="mt-3 pt-3 border-t border-amber-500/20 text-xs text-amber-500/70">
         {garden.completedTasks} tasks harvested
       </div>
 

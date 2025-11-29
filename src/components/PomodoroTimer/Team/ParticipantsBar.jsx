@@ -11,12 +11,12 @@ const ParticipantsBar = ({ participants, timerMode, isHost, onToggleMode, disabl
   const onlineCount = participantArray.filter(p => p.isOnline).length;
 
   return (
-    <div className="flex items-center gap-4 bg-white rounded-xl p-3 border border-slate-200">
+    <div className="flex items-center gap-4 glass-card p-3">
       {/* Timer mode toggle (host only) */}
       {isHost ? (
         <TimerModeToggle mode={timerMode} onToggle={onToggleMode} disabled={disabled} />
       ) : (
-        <div className="flex items-center gap-2 text-sm text-slate-600">
+        <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
           {timerMode === TIMER_MODES.TEAM ? <Users size={16} /> : <User size={16} />}
           <span>{timerMode === TIMER_MODES.TEAM ? 'Team Timer' : 'Individual'}</span>
         </div>
@@ -28,13 +28,13 @@ const ParticipantsBar = ({ participants, timerMode, isHost, onToggleMode, disabl
           <MemberStatus key={p.uid} participant={p} />
         ))}
         {participantArray.length > 8 && (
-          <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-medium text-slate-600">
+          <div className="w-8 h-8 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-xs font-medium text-[var(--color-text-secondary)]">
             +{participantArray.length - 8}
           </div>
         )}
       </div>
 
-      <span className="text-sm text-slate-500">{onlineCount} online</span>
+      <span className="text-sm text-[var(--color-text-muted)]">{onlineCount} online</span>
     </div>
   );
 };

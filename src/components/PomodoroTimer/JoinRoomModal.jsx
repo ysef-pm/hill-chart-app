@@ -29,20 +29,22 @@ const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loadin
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="glass-card-elevated max-w-md w-full overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-200">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🍅</span>
-            <h2 className="text-xl font-bold text-slate-900">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--color-border-subtle)]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
+              <span className="text-xl">🍅</span>
+            </div>
+            <h2 className="text-xl font-semibold text-[var(--color-text-primary)]">
               {mode === 'choose' && 'Tomato Task Garden'}
               {mode === 'create' && 'Create Focus Room'}
               {mode === 'join' && 'Join Focus Room'}
             </h2>
           </div>
-          <button onClick={resetAndClose} className="p-2 hover:bg-slate-100 rounded-full">
-            <X size={20} className="text-slate-500" />
+          <button onClick={resetAndClose} className="p-2 hover:bg-[var(--color-surface-2)] rounded-lg transition-colors">
+            <X size={20} className="text-[var(--color-text-tertiary)]" />
           </button>
         </div>
 
@@ -50,33 +52,33 @@ const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loadin
         <div className="p-6">
           {mode === 'choose' && (
             <div className="space-y-4">
-              <p className="text-sm text-slate-500 text-center mb-4">
+              <p className="text-sm text-[var(--color-text-muted)] text-center mb-4">
                 Grow productivity one tomato at a time
               </p>
 
               <button
                 onClick={() => setMode('create')}
-                className="w-full p-4 bg-red-50 hover:bg-red-100 border-2 border-red-200 rounded-xl flex items-center gap-4 transition-colors"
+                className="w-full p-4 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-xl flex items-center gap-4 transition-colors"
               >
-                <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center">
                   <Plus size={24} className="text-white" />
                 </div>
                 <div className="text-left">
-                  <p className="font-bold text-slate-900">Create Focus Room</p>
-                  <p className="text-sm text-slate-500">Start a new pomodoro session</p>
+                  <p className="font-semibold text-[var(--color-text-primary)]">Create Focus Room</p>
+                  <p className="text-sm text-[var(--color-text-tertiary)]">Start a new pomodoro session</p>
                 </div>
               </button>
 
               <button
                 onClick={() => setMode('join')}
-                className="w-full p-4 bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 rounded-xl flex items-center gap-4 transition-colors"
+                className="w-full p-4 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-xl flex items-center gap-4 transition-colors"
               >
-                <div className="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-full flex items-center justify-center">
                   <Users size={24} className="text-white" />
                 </div>
                 <div className="text-left">
-                  <p className="font-bold text-slate-900">Join Existing Room</p>
-                  <p className="text-sm text-slate-500">Enter a room code to join</p>
+                  <p className="font-semibold text-[var(--color-text-primary)]">Join Existing Room</p>
+                  <p className="text-sm text-[var(--color-text-tertiary)]">Enter a room code to join</p>
                 </div>
               </button>
             </div>
@@ -86,7 +88,7 @@ const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loadin
             <div className="space-y-4">
               {mode === 'create' && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">
                     Room Name
                   </label>
                   <input
@@ -94,14 +96,14 @@ const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loadin
                     value={roomName}
                     onChange={(e) => setRoomName(e.target.value)}
                     placeholder="e.g., Sprint Focus Session"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="w-full px-4 py-2 bg-[var(--color-surface-1)] border border-[var(--color-border-default)] rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]"
                   />
                 </div>
               )}
 
               {mode === 'join' && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">
                     Room Code
                   </label>
                   <input
@@ -110,13 +112,13 @@ const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loadin
                     onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                     placeholder="e.g., ABC123"
                     maxLength={6}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 uppercase tracking-widest text-center text-xl font-mono"
+                    className="w-full px-4 py-2 bg-[var(--color-surface-1)] border border-[var(--color-border-default)] rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent uppercase tracking-widest text-center text-xl font-mono text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]"
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">
                   Your Name
                 </label>
                 <input
@@ -124,12 +126,12 @@ const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loadin
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
                   placeholder="How should we call you?"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                  className="w-full px-4 py-2 bg-[var(--color-surface-1)] border border-[var(--color-border-default)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
                   Pick Your Color
                 </label>
                 <div className="flex gap-2 flex-wrap">
@@ -137,8 +139,8 @@ const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loadin
                     <button
                       key={color}
                       onClick={() => setSelectedColor(color)}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform ${
-                        selectedColor === color ? 'ring-2 ring-offset-2 ring-slate-400 scale-110' : ''
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                        selectedColor === color ? 'ring-2 ring-offset-2 ring-offset-[var(--color-bg-primary)] ring-[var(--color-accent)] scale-110' : ''
                       }`}
                       style={{ backgroundColor: color }}
                     >
@@ -153,7 +155,7 @@ const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loadin
               </div>
 
               {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
                   {error}
                 </div>
               )}
@@ -161,14 +163,14 @@ const JoinRoomModal = ({ isOpen, onClose, onCreateRoom, onJoinRoom, user, loadin
               <div className="flex gap-2 pt-4">
                 <button
                   onClick={() => setMode('choose')}
-                  className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
+                  className="flex-1 px-4 py-2 border border-[var(--color-border-default)] text-[var(--color-text-secondary)] rounded-lg hover:bg-[var(--color-surface-2)] transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={mode === 'create' ? handleCreate : handleJoin}
                   disabled={loading || (mode === 'join' && roomCode.length !== 6)}
-                  className={`flex-1 px-4 py-2 text-white rounded-lg font-medium disabled:opacity-50 ${
+                  className={`flex-1 px-4 py-2 text-white rounded-lg font-medium disabled:opacity-50 transition-colors ${
                     mode === 'create'
                       ? 'bg-red-500 hover:bg-red-600'
                       : 'bg-amber-500 hover:bg-amber-600'

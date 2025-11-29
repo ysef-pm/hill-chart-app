@@ -1,7 +1,7 @@
 // src/components/RetroBoard/RetroBoardApp.jsx
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Users, Eye, EyeOff, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Users, Eye, EyeOff, Copy, Check, MessageSquare } from 'lucide-react';
 import { useRetroRoom } from './hooks/useRetroRoom';
 import { RETRO_SECTIONS } from './constants';
 import JoinRoomModal from './JoinRoomModal';
@@ -74,30 +74,35 @@ const RetroBoardApp = ({ user, onBack }) => {
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-[var(--color-bg-primary)]">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-4 py-3">
+      <header className="glass-card border-b border-[var(--color-border-subtle)] px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={handleBack}
-              className="p-2 hover:bg-slate-100 rounded-full"
+              className="p-2 hover:bg-[var(--color-surface-2)] rounded-lg transition-colors"
             >
-              <ArrowLeft size={20} className="text-slate-600" />
+              <ArrowLeft size={20} className="text-[var(--color-text-tertiary)]" />
             </button>
-            <div>
-              <h1 className="font-bold text-slate-900">
-                {room?.name || 'Retro Board'}
-              </h1>
-              {roomCode && (
-                <button
-                  onClick={handleCopyCode}
-                  className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700"
-                >
-                  <span className="font-mono">{roomCode}</span>
-                  {copied ? <Check size={14} /> : <Copy size={14} />}
-                </button>
-              )}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center">
+                <MessageSquare size={20} className="text-white" />
+              </div>
+              <div>
+                <h1 className="font-semibold text-[var(--color-text-primary)]">
+                  {room?.name || 'Retro Board'}
+                </h1>
+                {roomCode && (
+                  <button
+                    onClick={handleCopyCode}
+                    className="flex items-center gap-1 text-sm text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] transition-colors"
+                  >
+                    <span className="font-mono">{roomCode}</span>
+                    {copied ? <Check size={14} className="text-[var(--color-accent)]" /> : <Copy size={14} />}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -107,9 +112,9 @@ const RetroBoardApp = ({ user, onBack }) => {
               {isHost && (
                 <button
                   onClick={room?.isRevealed ? hideAll : revealAll}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${room?.isRevealed
-                      ? 'bg-slate-200 text-slate-700 hover:bg-slate-300'
-                      : 'bg-emerald-500 text-white hover:bg-emerald-600'
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-colors ${room?.isRevealed
+                      ? 'bg-[var(--color-surface-2)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-3)] border border-[var(--color-border-subtle)]'
+                      : 'bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)]'
                     }`}
                 >
                   {room?.isRevealed ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -120,7 +125,7 @@ const RetroBoardApp = ({ user, onBack }) => {
               {/* Participants button */}
               <button
                 onClick={() => setShowParticipants(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg"
+                className="flex items-center gap-2 px-4 py-2 bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] text-[var(--color-text-secondary)] rounded-xl transition-colors border border-[var(--color-border-subtle)]"
               >
                 <Users size={18} />
                 <span>{Object.keys(participants).length}</span>
@@ -135,7 +140,7 @@ const RetroBoardApp = ({ user, onBack }) => {
         <main className="max-w-7xl mx-auto p-4">
           {/* Reveal status banner */}
           {!room?.isRevealed && (
-            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2 text-amber-800">
+            <div className="mb-4 p-3 glass-card border border-amber-500/30 flex items-center gap-2 text-amber-400">
               <EyeOff size={18} />
               <span className="text-sm">
                 Items are hidden. {isHost ? 'Click "Reveal All" when ready.' : 'Waiting for host to reveal.'}
@@ -163,7 +168,7 @@ const RetroBoardApp = ({ user, onBack }) => {
         </main>
       ) : (
         <div className="flex items-center justify-center h-[calc(100vh-64px)]">
-          <div className="text-center text-slate-500">
+          <div className="text-center text-[var(--color-text-muted)]">
             <p>Create or join a retro to get started</p>
           </div>
         </div>

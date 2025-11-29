@@ -24,8 +24,8 @@ const NotificationSettings = ({ settings, onUpdate, disabled }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl p-4 border border-slate-200">
-      <h3 className="font-medium text-slate-900 mb-3 flex items-center gap-2">
+    <div className="bg-[var(--color-surface-1)] rounded-xl p-4 border border-[var(--color-border-subtle)]">
+      <h3 className="font-medium text-[var(--color-text-primary)] mb-3 flex items-center gap-2">
         <span>⚙️</span>
         Notifications
       </h3>
@@ -35,11 +35,11 @@ const NotificationSettings = ({ settings, onUpdate, disabled }) => {
         <label className="flex items-center justify-between cursor-pointer">
           <div className="flex items-center gap-2">
             {settings?.soundEnabled ? (
-              <Volume2 size={18} className="text-slate-500" />
+              <Volume2 size={18} className="text-[var(--color-text-secondary)]" />
             ) : (
-              <VolumeX size={18} className="text-slate-400" />
+              <VolumeX size={18} className="text-[var(--color-text-muted)]" />
             )}
-            <span className="text-sm text-slate-700">Play sound</span>
+            <span className="text-sm text-[var(--color-text-secondary)]">Play sound</span>
           </div>
           <input
             type="checkbox"
@@ -54,11 +54,11 @@ const NotificationSettings = ({ settings, onUpdate, disabled }) => {
         <label className="flex items-center justify-between cursor-pointer">
           <div className="flex items-center gap-2">
             {settings?.notificationsEnabled ? (
-              <Bell size={18} className="text-slate-500" />
+              <Bell size={18} className="text-[var(--color-text-secondary)]" />
             ) : (
-              <BellOff size={18} className="text-slate-400" />
+              <BellOff size={18} className="text-[var(--color-text-muted)]" />
             )}
-            <span className="text-sm text-slate-700">Browser alerts</span>
+            <span className="text-sm text-[var(--color-text-secondary)]">Browser alerts</span>
           </div>
           <input
             type="checkbox"
