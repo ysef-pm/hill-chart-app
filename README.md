@@ -82,6 +82,36 @@ npm run dev
 
 Your app will be available at `http://localhost:5173`
 
+## MCC Finder
+
+Enter a company name and the MCC Finder:
+
+1. finds the official website and writes a 2-sentence business-model description
+   (Claude, with web search), then
+2. suggests the merchant category code (MCC) with alternatives and confidence
+   ([TypeSafe AI's Jev](https://typesafe.ai) model).
+
+The browser never sees the API keys. The page calls two Vercel functions,
+`api/mcc/research.js` and `api/mcc/classify.js`, which check the user's Firebase
+login before calling Claude or TypeSafe.
+
+### Setup
+
+Add these as **server-side** environment variables in Vercel
+(Project → Settings → Environment Variables), *without* a `VITE_` prefix:
+
+| Variable | Purpose |
+|---|---|
+| `ANTHROPIC_API_KEY` | Claude research step |
+| `TYPESAFE_API_KEY` | Jev classification step |
+| `MCC_ALLOWED_EMAILS` | Optional. Comma-separated emails or `@domain`s allowed to run lookups |
+
+The functions reuse `VITE_FIREBASE_PROJECT_ID` to verify logins. For local
+development, put the same variables in `.env.local` and run `npm run dev`: a
+small Vite plugin serves `/api/mcc/*` locally.
+
+Tests for the functions run offline with mocked APIs: `npm test`.
+
 ## Deployment to Vercel (Recommended)
 
 Vercel offers the easiest deployment experience:

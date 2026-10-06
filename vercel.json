@@ -1,0 +1,6 @@
+{
+  "functions": {
+    "api/mcc/research.js": { "maxDuration": 120 },
+    "api/mcc/classify.js": { "maxDuration": 30 }
+  }
+}

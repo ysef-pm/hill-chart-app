@@ -7,12 +7,16 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test 'tests/*.test.js'"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
+    "@typesafe-ai/sdk": "^0.6.0",
     "firebase": "^12.6.0",
     "framer-motion": "^12.23.24",
     "html2canvas": "^1.4.1",
+    "jose": "^6.2.12",
     "lucide-react": "^0.554.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

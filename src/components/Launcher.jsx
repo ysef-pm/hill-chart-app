@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogOut, TrendingUp, Smile, MessageSquare, CheckSquare, Heart, BookOpen, Timer, Layers, ChevronRight } from 'lucide-react';
+import { LogOut, TrendingUp, Smile, MessageSquare, CheckSquare, Heart, BookOpen, Timer, Layers, ChevronRight, CreditCard } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { PomodoroApp } from './PomodoroTimer';
@@ -52,6 +52,14 @@ const tools = [
         icon: Heart,
         gradient: 'from-red-500 to-rose-500',
         glowColor: 'rgba(239, 68, 68, 0.4)',
+    },
+    {
+        id: 'mcc-finder',
+        name: 'MCC Finder',
+        description: 'Look up a company and get its merchant category code.',
+        icon: CreditCard,
+        gradient: 'from-sky-500 to-indigo-500',
+        glowColor: 'rgba(99, 102, 241, 0.4)',
     },
 ];
 

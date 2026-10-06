@@ -5,6 +5,7 @@ import { FeelingsWheelApp } from '../components/FeelingsWheel';
 import { RetroBoardApp } from '../components/RetroBoard';
 import { HabitTrackerApp } from '../components/HabitTracker';
 import { KudosBoardApp } from '../components/KudosBoard';
+import { MccFinderApp } from '../components/MccFinder';
 
 export default function Dashboard({ user }) {
     const [currentApp, setCurrentApp] = useState(null); // null = Launcher
@@ -27,6 +28,10 @@ export default function Dashboard({ user }) {
 
     if (currentApp === 'kudos-board') {
         return <KudosBoardApp user={user} onBack={() => setCurrentApp(null)} />;
+    }
+
+    if (currentApp === 'mcc-finder') {
+        return <MccFinderApp user={user} onBack={() => setCurrentApp(null)} />;
     }
 
     return <Launcher user={user} onSelectApp={setCurrentApp} />;
