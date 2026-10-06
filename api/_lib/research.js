@@ -40,6 +40,9 @@ const TOOLS = [
 export class ResearchError extends Error {}
 
 export async function researchCompany({ name, website, client }) {
+  if (!client && !process.env.ANTHROPIC_API_KEY) {
+    throw new Error('ANTHROPIC_API_KEY is not set for this deployment. Add it in Vercel and redeploy.');
+  }
   client ??= new Anthropic();
   let prompt = `Company: ${name}`;
   if (website) prompt += `\nWebsite (given by the user, verify it): ${website}`;

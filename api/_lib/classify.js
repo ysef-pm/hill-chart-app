@@ -36,6 +36,9 @@ export async function classifyMcc({ description, companyName, website, topN = 5,
   if (companyName) state.company = companyName;
   if (website) state.website = website;
 
+  if (!client && !process.env.TYPESAFE_API_KEY) {
+    throw new Error('TYPESAFE_API_KEY is not set for this deployment. Add it in Vercel and redeploy.');
+  }
   client ??= new TypeSafeClient();
   const response = await client.systemOne({ state, questions: buildQuestions() });
   const answers = response.answers;

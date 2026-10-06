@@ -103,3 +103,16 @@ test('endpoints reject non-POST and unauthenticated requests', async () => {
   await research({ method: 'POST', headers: { authorization: 'Bearer not-a-jwt' }, body: { name: 'Stripe' } }, res);
   assert.equal(res.statusCode, 401);
 });
+
+test('missing server keys produce a clear error', async () => {
+  const saved = { a: process.env.ANTHROPIC_API_KEY, t: process.env.TYPESAFE_API_KEY };
+  delete process.env.ANTHROPIC_API_KEY;
+  delete process.env.TYPESAFE_API_KEY;
+  try {
+    await assert.rejects(researchCompany({ name: 'x' }), /ANTHROPIC_API_KEY is not set/);
+    await assert.rejects(classifyMcc({ description: 'x' }), /TYPESAFE_API_KEY is not set/);
+  } finally {
+    if (saved.a !== undefined) process.env.ANTHROPIC_API_KEY = saved.a;
+    if (saved.t !== undefined) process.env.TYPESAFE_API_KEY = saved.t;
+  }
+});
