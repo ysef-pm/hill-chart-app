@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { TypeSafeClient } from '@typesafe-ai/sdk';
 
-import { buildQuestions, classifyMcc } from '../api/_lib/classify.js';
+import { buildCodeQuestions, buildGroupQuestion, classifyMcc, pickGroups } from '../api/_lib/classify.js';
 import { ALL_CODES, CODES_BY_GROUP } from '../api/_lib/mcc-codes.js';
 import { researchCompany } from '../api/_lib/research.js';
 import research from '../api/mcc/research.js';
@@ -17,8 +17,11 @@ test('code table excludes brand block and every code lands in a group', () => {
   assert.equal(grouped, Object.keys(ALL_CODES).length);
 });
 
+const jevCalls = [];
+
 function fakeJev(url, init) {
   const body = JSON.parse(init.body);
+  jevCalls.push(body);
   assert.equal(new URL(url).pathname, '/v1/systemone');
   assert.match(body.state.business_model, /^Stripe sells/);
   const answers = {};
@@ -38,13 +41,19 @@ function fakeJev(url, init) {
   ));
 }
 
-test('classify ranks codes by P(group) * P(code | group)', async () => {
+test('classify asks groups first, then codes for the likely groups only', async () => {
+  jevCalls.length = 0;
   const client = new TypeSafeClient({ apiKey: 'test', fetch: fakeJev });
   const r = await classifyMcc({
     description: 'Stripe sells payment APIs to online businesses. It charges a per-transaction fee.',
     companyName: 'Stripe',
     client,
   });
+  assert.equal(jevCalls.length, 2);
+  assert.deepEqual(Object.keys(jevCalls[0].questions), ['group']);
+  const stage2 = Object.keys(jevCalls[1].questions);
+  assert.equal(stage2[0], 'mcc__business_services');
+  assert.ok(stage2.length <= 3);
   assert.equal(r.mcc, '7372');
   assert.equal(r.group, 'business_services');
   assert.ok(Math.abs(r.confidence - 0.48) < 1e-6);
@@ -52,10 +61,18 @@ test('classify ranks codes by P(group) * P(code | group)', async () => {
   assert.equal(r.model, 'jev-test');
 });
 
-test('questions include one choice per non-empty group', () => {
-  const q = buildQuestions();
-  assert.deepEqual(Object.keys(q.group.criteria).sort(), Object.keys(CODES_BY_GROUP).sort());
-  assert.equal(Object.keys(q).length, Object.keys(CODES_BY_GROUP).length + 1);
+test('pickGroups stops at 85% mass or 3 groups', () => {
+  assert.deepEqual(pickGroups({ a: 0.9, b: 0.1 }), ['a']);
+  assert.deepEqual(pickGroups({ a: 0.5, b: 0.4, c: 0.1 }), ['a', 'b']);
+  assert.deepEqual(pickGroups({ a: 0.3, b: 0.3, c: 0.2, d: 0.2 }), ['a', 'b', 'c']);
+});
+
+test('questions are well-formed choices', () => {
+  const g = buildGroupQuestion().group;
+  assert.deepEqual(Object.keys(g.criteria).sort(), Object.keys(CODES_BY_GROUP).sort());
+  const q = buildCodeQuestions(['misc_retail', 'financial']);
+  assert.deepEqual(Object.keys(q), ['mcc__misc_retail', 'mcc__financial']);
+  assert.equal(Object.keys(q.mcc__misc_retail.criteria).length, Object.keys(CODES_BY_GROUP.misc_retail).length);
 });
 
 test('research resumes pause_turn and returns the report tool input', async () => {

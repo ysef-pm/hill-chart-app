@@ -16,6 +16,28 @@ function send(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
+// Upstream SDK errors carry `status` and a request id; keep both in the message
+// so a screenshot of the UI is enough to diagnose. `err.source` is set by
+// tagErrors() in the module that made the call.
+export function describeUpstream(err) {
+  const source = err?.source || 'Upstream';
+  const id = err?.requestId || err?.headers?.get?.('request-id');
+  const status = typeof err?.status === 'number' ? ` ${err.status}` : '';
+  let message = `${source}${status}: ${err?.message || 'request failed'}`;
+  if (id) message += ` (request ${id})`;
+  return message;
+}
+
+// Run fn, labelling any error it throws with the upstream service name.
+export async function tagErrors(source, fn) {
+  try {
+    return await fn();
+  } catch (err) {
+    if (err && typeof err === 'object' && !err.source) err.source = source;
+    throw err;
+  }
+}
+
 export function postHandler(fn) {
   return async function handler(req, res) {
     if (req.method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
@@ -26,8 +48,8 @@ export function postHandler(fn) {
     } catch (err) {
       if (err instanceof AuthError) return send(res, 401, { error: err.message });
       if (err instanceof BadRequest) return send(res, 400, { error: err.message });
-      console.error(err);
-      return send(res, 502, { error: err.message || 'Upstream error' });
+      console.error(err, err?.body ?? '');
+      return send(res, 502, { error: describeUpstream(err) });
     }
   };
 }

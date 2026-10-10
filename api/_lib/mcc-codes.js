@@ -1,11 +1,8 @@
 // MCC reference table grouped into ISO 18245 ranges for two-level classification.
 //
-// mcc-codes.json is built from https://github.com/greggles/mcc-codes (public
-// domain), minus the 3000-3999 block of individual airline / hotel / car-rental
-// brands, plus a few newer network codes (5262, 5552, 6540). Kept in sync with
-// devcom-mcp's src/devcom_mcp/mcc/mcc_codes.json.
+// The code table lives in mcc-codes.data.js (see its header for provenance).
 
-import codes from './mcc-codes.json' with { type: 'json' };
+import codes from './mcc-codes.data.js';
 
 export const ALL_CODES = codes;
 

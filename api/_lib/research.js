@@ -4,6 +4,7 @@
 // findings through a strict `report_company` tool so we get structured fields.
 
 import Anthropic from '@anthropic-ai/sdk';
+import { tagErrors } from './handler.js';
 
 const MODEL = process.env.MCC_CLAUDE_MODEL || 'claude-opus-5-5';
 const MAX_CONTINUATIONS = 4;
@@ -49,7 +50,7 @@ export async function researchCompany({ name, website, client }) {
   const messages = [{ role: 'user', content: prompt }];
 
   for (let i = 0; i <= MAX_CONTINUATIONS; i++) {
-    const response = await client.beta.messages.create({
+    const response = await tagErrors('Anthropic', () => client.beta.messages.create({
       model: MODEL,
       max_tokens: 16000,
       system: SYSTEM,
@@ -59,7 +60,7 @@ export async function researchCompany({ name, website, client }) {
       betas: ['server-side-fallback-2026-07-01'],
       fallbacks: 'default',
       messages,
-    });
+    }));
 
     const report = response.content.find((b) => b.type === 'tool_use' && b.name === 'report_company');
     if (report) {
